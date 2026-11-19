@@ -1,3 +1,5 @@
+#include ../../shaders/chunks/refraction.glsl
+
 uniform samplerCube uEnvMap;
 uniform vec3 uTint;
 uniform float uIor;
@@ -8,17 +10,6 @@ uniform float uImpactReact;
 varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
 varying float vImpact;
-
-// Refract through the front face, travel the "chord" of the (roughly spherical) body,
-// then refract again on the exit face. Falls back to internal reflection on TIR.
-vec3 throughGlass(vec3 v, vec3 n, float ior) {
-  vec3 d = refract(-v, n, 1.0 / ior);
-  // Exit normal of a sphere along the chord d starting at the entry point.
-  vec3 nOut = normalize(n - 2.0 * dot(n, d) * d);
-  vec3 r2 = refract(d, -nOut, ior);
-  if (dot(r2, r2) < 1e-4) r2 = reflect(d, -nOut);
-  return r2;
-}
 
 void main() {
   vec3 n = normalize(vWorldNormal);
