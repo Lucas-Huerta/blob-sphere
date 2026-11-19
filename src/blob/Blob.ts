@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { blendThreshold, patchForBlend } from '@/blob/blend';
 import type { MaterialContext, MaterialDef } from '@/materials/types';
 
 const MAX_IMPACTS = 3;
@@ -33,6 +34,23 @@ export class Blob {
   /** Max distance (world units) the blob can be carried from the centre. */
   private static readonly REACH = new THREE.Vector2(1.9, 1.1);
 
+  /** Animation speed multiplier (scales shader time and the idle rotation). */
+  speed = 1;
+  /** Called whenever the primary or the blend material instance changes. */
+  onMaterialsChanged?: () => void;
+
+  private animTime = 0;
+  private blendDef: MaterialDef | null = null;
+  private blendMesh: THREE.Mesh;
+  private partnerMaterial: THREE.ShaderMaterial | null = null;
+  private blendAmount = 0;
+  /** Dissolve threshold and per-mesh shape weights, shared by the two blended materials. */
+  private blendUniforms = {
+    uBlend: { value: blendThreshold(0) },
+    shapeA: { value: 0 },
+    shapeB: { value: 1 },
+  };
+
   /** Scales down motion for prefers-reduced-motion. */
   motionScale = 1;
 
@@ -40,8 +58,13 @@ export class Blob {
   spin = 0;
 
   constructor(def: MaterialDef, private ctx: MaterialContext) {
-    this.mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 64), def.create(this.ctx));
-    this.attachShared(this.material);
+    const geometry = new THREE.IcosahedronGeometry(1, 64);
+    this.mesh = new THREE.Mesh(geometry, def.create(this.ctx));
+    this.attachShared(this.material, true);
+    // The partner of a blend rides along as a child so it follows every transform of the body.
+    this.blendMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial()); // placeholder until used
+    this.blendMesh.visible = false;
+    this.mesh.add(this.blendMesh);
   }
 
   get material(): THREE.ShaderMaterial {
@@ -51,8 +74,59 @@ export class Blob {
   setMaterial(def: MaterialDef): void {
     this.material.dispose();
     const next = def.create(this.ctx);
-    this.attachShared(next);
+    this.attachShared(next, true);
     this.mesh.material = next;
+    this.onMaterialsChanged?.();
+  }
+
+  /** The material blended in on top of the primary one, if it has been created yet. */
+  get blendMaterial(): THREE.ShaderMaterial | null {
+    return this.partnerMaterial;
+  }
+
+  get blendWith(): MaterialDef | null {
+    return this.blendDef;
+  }
+
+  get blendValue(): number {
+    return this.blendAmount;
+  }
+
+  /** Choose the material blended with the primary one (`null` for none). */
+  setBlendWith(def: MaterialDef | null): void {
+    if (def === this.blendDef) return;
+    this.blendDef = def;
+    this.disposeBlendMaterial();
+    this.syncBlend();
+    this.onMaterialsChanged?.();
+  }
+
+  /** 0 = primary material only, 1 = partner only; in between the two dissolve into each other. */
+  setBlendAmount(amount: number): void {
+    this.blendAmount = THREE.MathUtils.clamp(amount, 0, 1);
+    this.syncBlend();
+  }
+
+  private disposeBlendMaterial(): void {
+    this.partnerMaterial?.dispose();
+    this.partnerMaterial = null;
+    this.blendMesh.visible = false;
+  }
+
+  /** Create the partner material lazily (only once the slider leaves 0) and show/hide its mesh. */
+  private syncBlend(): void {
+    const active = this.blendDef !== null && this.blendAmount > 0;
+    if (active && !this.blendMaterial) {
+      const material = this.blendDef!.create(this.ctx);
+      this.attachShared(material, false);
+      this.partnerMaterial = material;
+      this.blendMesh.material = material;
+      this.onMaterialsChanged?.();
+    }
+    this.blendMesh.visible = active;
+    this.blendUniforms.uBlend.value = blendThreshold(active ? this.blendAmount : 0);
+    this.blendUniforms.shapeA.value = active ? this.blendAmount : 0;
+    this.blendUniforms.shapeB.value = active ? 1 - this.blendAmount : 0;
   }
 
   /**
@@ -141,13 +215,34 @@ export class Blob {
     this.velocity.multiplyScalar(Math.max(0, 1 - RECOIL_DAMPING * dt));
     pos.addScaledVector(this.velocity, dt);
 
-    this.material.uniforms.uTime.value = time;
+    this.animTime += dt * this.speed;
+    this.material.uniforms.uTime.value = this.animTime;
+    const partner = this.blendMesh.visible ? this.blendMaterial : null;
+    if (partner) {
+      partner.uniforms.uTime.value = this.animTime;
+      // Each material displaces with the mix of both shapes, so the two silhouettes coincide.
+      const a = this.material.uniforms;
+      const b = partner.uniforms;
+      a.uOtherAmplitude.value = b.uAmplitude.value;
+      a.uOtherFrequency.value = b.uFrequency.value;
+      b.uOtherAmplitude.value = a.uAmplitude.value;
+      b.uOtherFrequency.value = a.uFrequency.value;
+    }
     // The blob leans towards where it is carried, as if turning to follow the hand.
-    this.mesh.rotation.y = time * 0.1 + pos.x * 0.35 + this.spin;
+    this.mesh.rotation.y = this.animTime * 0.1 + pos.x * 0.35 + this.spin;
     this.mesh.rotation.x = -pos.y * 0.35;
   }
 
-  private attachShared(material: THREE.ShaderMaterial): void {
-    Object.assign(material.uniforms, this.impactUniforms);
+  /** Wire the uniforms and shader patch every blob material needs (impacts, blend dissolve). */
+  private attachShared(material: THREE.ShaderMaterial, primary: boolean): void {
+    const u = material.uniforms;
+    Object.assign(u, this.impactUniforms, {
+      uBlend: this.blendUniforms.uBlend,
+      uBlendSide: { value: primary ? 1 : -1 },
+      uShapeBlend: primary ? this.blendUniforms.shapeA : this.blendUniforms.shapeB,
+      uOtherAmplitude: { value: u.uAmplitude?.value ?? 0 },
+      uOtherFrequency: { value: u.uFrequency?.value ?? 0 },
+    });
+    material.onBeforeCompile = patchForBlend;
   }
 }

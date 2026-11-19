@@ -4,6 +4,12 @@ uniform float uTime;
 uniform float uAmplitude;
 uniform float uFrequency;
 
+// Material blend: shape parameters of the partner material, mixed in by uShapeBlend (0..1),
+// so both blended meshes share the same silhouette.
+uniform float uShapeBlend;
+uniform float uOtherAmplitude;
+uniform float uOtherFrequency;
+
 // Click impacts: xyz = unit direction (object space), w = age in seconds (< 0 = inactive).
 #define MAX_IMPACTS 3
 uniform vec4 uImpacts[MAX_IMPACTS];
@@ -46,8 +52,10 @@ float impactAt(vec3 p) {
 
 // Radial displacement of a point on the unit sphere.
 vec3 displace(vec3 p) {
-  float n = snoise(p * uFrequency + vec3(0.0, 0.0, uTime * 0.4));
-  vec3 d = p * (1.0 + n * uAmplitude + impactAt(p));
+  float freq = mix(uFrequency, uOtherFrequency, uShapeBlend);
+  float amp = mix(uAmplitude, uOtherAmplitude, uShapeBlend);
+  float n = snoise(p * freq + vec3(0.0, 0.0, uTime * 0.4));
+  vec3 d = p * (1.0 + n * amp + impactAt(p));
   // Surface dragged towards the cursor, trailing behind it.
   d += uGrabDrag * grabWeight(normalize(p)) * 0.9;
   return d;

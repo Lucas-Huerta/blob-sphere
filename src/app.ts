@@ -11,6 +11,8 @@ import { HandController } from '@/input/hands/HandController';
 import { HandTracker } from '@/input/hands/HandTracker';
 import { Hud } from '@/ui/hud';
 import { HandControlUi } from '@/ui/handControl';
+import { SettingsPanel } from '@/ui/settings';
+import { MixPanel } from '@/ui/mix';
 
 export class App {
   private renderer = new THREE.WebGLRenderer({
@@ -45,6 +47,8 @@ export class App {
     this.camera.position.z = this.cameraDistance;
 
     new Hud(document.body, materials, this.carousel);
+    new SettingsPanel(this.blob, materials, this.carousel);
+    new MixPanel(document.body, this.blob, materials, this.carousel);
     this.setupHands();
     bindKeyboard(this.carousel);
     // Registered first so `grabbed` is already up to date when the swipe handler reads it.
