@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /models/
+Disallow: /mediapipe/
+Sitemap: https://morph.huertalucas13.workers.dev/sitemap.xml
