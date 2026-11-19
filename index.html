@@ -2,12 +2,12 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Blob Sphere</title>
     <style>
-      html, body { margin: 0; height: 100%; background: var(--bg, #0b0b10); transition: background 0.8s ease; overflow: hidden; }
+      html, body { margin: 0; height: 100%; background: var(--bg, #0b0b10); transition: background 0.8s ease; overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
       #app { position: fixed; inset: 0; }
-      canvas { display: block; }
+      canvas { display: block; touch-action: none; }
     </style>
   </head>
   <body>

@@ -13,7 +13,11 @@ import { Hud } from '@/ui/hud';
 import { HandControlUi } from '@/ui/handControl';
 
 export class App {
-  private renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  private renderer = new THREE.WebGLRenderer({
+    antialias: window.devicePixelRatio < 2,
+    alpha: true,
+    powerPreference: 'high-performance',
+  });
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
   private blob: Blob;
@@ -21,18 +25,24 @@ export class App {
   private clock = new THREE.Clock();
   private timeline?: gsap.core.Timeline;
   private tracker = new HandTracker();
+  private coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  /** Camera distance that frames the whole blob; grows on narrow (portrait) screens. */
+  private baseDistance = 5;
   private cameraDistance = 5;
   private cameraDistanceTarget = 5;
   private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(private container: HTMLElement) {
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Phones have dense screens and weak GPUs: cap the pixel ratio lower than on desktop.
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.coarsePointer ? 1.5 : 2));
     this.blob = new Blob(materials[0], { envMap: createEnvironment(this.renderer) });
     container.appendChild(this.renderer.domElement);
     this.camera.position.set(0, 0, 5);
     this.scene.add(this.blob.mesh);
     window.addEventListener('resize', this.resize);
     this.resize();
+    this.cameraDistance = this.cameraDistanceTarget;
+    this.camera.position.z = this.cameraDistance;
 
     new Hud(document.body, materials, this.carousel);
     this.setupHands();
@@ -75,7 +85,7 @@ export class App {
         pinchMove: (ndc) => this.blob.grab(ndc, this.camera),
         pinchEnd: () => this.blob.releaseGrab(),
         openHand: (ndc) => this.blob.carryTo(ndc),
-        zoom: (factor) => (this.cameraDistanceTarget = 5 * factor),
+        zoom: (factor) => (this.cameraDistanceTarget = this.baseDistance * factor),
         handsSeen: (n) => ui.setHandsSeen(n),
         cursor: (ndc, pinching) => ui.setCursor(ndc, pinching),
       },
@@ -91,7 +101,7 @@ export class App {
   private stopHands(): void {
     this.tracker.stop();
     this.handController?.reset();
-    this.cameraDistanceTarget = 5;
+    this.cameraDistanceTarget = this.baseDistance;
   }
 
   /** Spin the blob one full turn in the navigation direction, swapping the material mid-turn. */
@@ -118,7 +128,19 @@ export class App {
   private resize = (): void => {
     const { clientWidth: w, clientHeight: h } = this.container;
     this.renderer.setSize(w, h);
-    this.camera.aspect = w / h;
+    const aspect = w / h;
+    this.camera.aspect = aspect;
+
+    // Keep the blob fully visible: widen the framing when the screen is narrower than the blob needs.
+    const fovTan = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    const minVisibleWidth = 3.4;
+    const wasAtBase = Math.abs(this.cameraDistanceTarget - this.baseDistance) < 1e-3;
+    this.baseDistance = Math.max(5, minVisibleWidth / (2 * fovTan * aspect));
+    if (wasAtBase) this.cameraDistanceTarget = this.baseDistance;
+
+    // In portrait the title/description sit under the blob: shift the view so it rides a bit higher.
+    const lift = aspect < 0.8 ? h * 0.07 : 0;
+    this.camera.setViewOffset(w, h, 0, lift, w, h);
     this.camera.updateProjectionMatrix();
   };
 }
