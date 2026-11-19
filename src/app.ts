@@ -4,6 +4,7 @@ import { createEnvironment } from '@/core/environment';
 import { Blob } from '@/blob/Blob';
 import { Carousel } from '@/carousel/Carousel';
 import { bindKeyboard } from '@/input/keyboard';
+import { bindPoke } from '@/input/poke';
 import { bindSwipe } from '@/input/swipe';
 import { materials } from '@/materials';
 import { Hud } from '@/ui/hud';
@@ -29,7 +30,15 @@ export class App {
 
     new Hud(document.body, materials, this.carousel);
     bindKeyboard(this.carousel);
-    bindSwipe(this.renderer.domElement, this.carousel);
+    // Registered first so `grabbed` is already up to date when the swipe handler reads it.
+    const poke = bindPoke(this.renderer.domElement, {
+      poke: (ndc, strength) => this.blob.pokeAt(ndc, this.camera, strength),
+      grab: (ndc) => this.blob.grab(ndc, this.camera),
+      release: () => this.blob.releaseGrab(),
+    });
+    bindSwipe(this.renderer.domElement, this.carousel, () => poke.grabbed);
+    this.blob.motionScale = this.reducedMotion.matches ? 0.3 : 1;
+    this.reducedMotion.addEventListener('change', (e) => (this.blob.motionScale = e.matches ? 0.3 : 1));
     this.carousel.onChange((i) => this.transitionTo(i));
     this.setBackground(0);
   }

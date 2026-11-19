@@ -21,6 +21,7 @@ export const glass: MaterialDef = {
         uIor: { value: 1.45 },
         uDispersion: { value: 0.06 },
         uExposure: { value: 1.0 },
+        uImpactReact: { value: 6 },
       },
     }),
 };

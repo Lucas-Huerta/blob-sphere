@@ -2,10 +2,12 @@
 
 varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
+varying float vImpact;
 varying vec3 vObjPosition;
 
 void main() {
   vec3 p = position;
+  vImpact = impactAt(p);
   vObjPosition = p;
   vWorldNormal = normalize(mat3(modelMatrix) * blobNormal(p));
   vec4 world = modelMatrix * vec4(displace(p), 1.0);
