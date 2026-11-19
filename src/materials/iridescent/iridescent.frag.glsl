@@ -1,4 +1,5 @@
 #include ../../shaders/chunks/noise.glsl
+#include ../../shaders/chunks/thinFilm.glsl
 
 uniform samplerCube uEnvMap;
 uniform float uTime;
@@ -13,20 +14,6 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
 varying vec3 vObjPosition;
 varying float vImpact;
-
-const float PI = 3.14159265359;
-
-// Reflectance modulation of a thin film for the R, G, B wavelengths (nm).
-// Two-beam interference: optical path difference 2 * n * d * cos(theta_t).
-vec3 thinFilm(float cosTheta, float thickness) {
-  float sinT2 = (1.0 - cosTheta * cosTheta) / (uFilmIor * uFilmIor);
-  float cosTt = sqrt(max(1.0 - sinT2, 0.0));
-  float opd = 2.0 * uFilmIor * thickness * cosTt;
-  vec3 lambda = vec3(650.0, 510.0, 440.0);
-  // +PI: phase flip on reflection at the film's top surface.
-  vec3 phase = 2.0 * PI * opd / lambda + PI;
-  return 0.5 - 0.5 * cos(phase);
-}
 
 // Film thickness: domain-warped swirls, thinner at the top (soap drains downwards).
 float filmThickness() {
@@ -44,7 +31,7 @@ void main() {
   vec3 v = normalize(cameraPosition - vWorldPosition);
   float cosTheta = max(dot(n, v), 0.0);
 
-  vec3 film = thinFilm(cosTheta, filmThickness());
+  vec3 film = thinFilm(cosTheta, filmThickness(), uFilmIor);
   film = pow(film, vec3(1.4)); // push saturation
 
   vec3 env = textureCube(uEnvMap, reflect(-v, n)).rgb;
