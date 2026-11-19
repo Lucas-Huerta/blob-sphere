@@ -42,7 +42,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 
 **Priorité 3 (bonus, plus coûteux)**
 12. ✅ **Ferrofluide** — noir brillant avec pointes (normal/displacement spikes) piloté par bruit. *(fait : `materials/ferrofluid/`, cônes de Worley déplacés dans le vertex shader, normales suivant les pointes via le hook `BLOB_SURFACE` du chunk)*
-13. **Velours / tissu (sheen)** — rim light diffus, retroréflexion.
+13. ✅ **Velours / tissu (sheen)** — rim light diffus, retroréflexion. *(fait : `materials/velvet/`, lobe de sheen type Charlie + rim + rétroréflexion, poil brossé par bruit, marque au clic)*
 14. **Aurore / dégradé fresnel** — gradients fluides colorés, glow en bordure.
 15. **Wireframe / grille holo (tron)** — grille, scan, transparence.
 16. **Cristal à facettes** — normales plates (flat shading), gemme.
