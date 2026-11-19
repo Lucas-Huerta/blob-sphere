@@ -2,6 +2,7 @@
 vec3 ferroSurface(vec3 p);
 #define BLOB_SURFACE(p) ferroSurface(p)
 #include ../../shaders/chunks/blobDisplace.glsl
+#include ../../shaders/chunks/worley.glsl
 
 uniform float uSpikeHeight;
 uniform float uSpikeScale;   // cells per unit: how many spikes cover the sphere
@@ -12,27 +13,6 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
 varying float vImpact;
 varying float vSpike;
-
-vec3 hash33(vec3 p) {
-  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
-  p += dot(p, p.yxz + 33.33);
-  return fract((p.xxy + p.yxx) * p.zyx);
-}
-
-// Distance to the nearest feature point of a jittered 3D grid (Worley F1).
-float worley(vec3 x) {
-  vec3 i = floor(x);
-  vec3 f = fract(x);
-  float d = 4.0;
-  for (int z = -1; z <= 1; z++)
-    for (int y = -1; y <= 1; y++)
-      for (int k = -1; k <= 1; k++) {
-        vec3 g = vec3(float(k), float(y), float(z));
-        vec3 r = g + hash33(i + g) - f;
-        d = min(d, dot(r, r));
-      }
-  return sqrt(d);
-}
 
 // Spike height in 0..1 at a point of the unit sphere: one cone per Worley cell.
 float spikeAt(vec3 q) {
