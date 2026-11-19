@@ -1,6 +1,7 @@
 .hud {
   position: fixed;
   inset: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   pointer-events: none;
   color: #f2f2f7;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -9,7 +10,7 @@
 
 .hud-brand {
   position: absolute;
-  top: 4vh;
+  top: calc(env(safe-area-inset-top) + 4vh);
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
@@ -26,7 +27,7 @@
 .hud-info {
   position: absolute;
   left: 50%;
-  bottom: 12vh;
+  bottom: calc(env(safe-area-inset-bottom) + 12vh);
   transform: translateX(-50%);
   width: min(32rem, calc(100% - 8rem));
   text-align: center;
@@ -77,13 +78,13 @@
   transition: background 0.2s, transform 0.2s;
 }
 .hud-arrow:hover { background: rgb(255 255 255 / 0.16); }
-.hud-arrow-prev { left: 1.5rem; }
-.hud-arrow-next { right: 1.5rem; }
+.hud-arrow-prev { left: calc(env(safe-area-inset-left) + 1.5rem); }
+.hud-arrow-next { right: calc(env(safe-area-inset-right) + 1.5rem); }
 
 .hud-dots {
   position: absolute;
   left: 50%;
-  bottom: 5vh;
+  bottom: calc(env(safe-area-inset-bottom) + 5vh);
   transform: translateX(-50%);
   display: flex;
   gap: 0.6rem;
@@ -97,16 +98,36 @@
   background: rgb(255 255 255 / 0.3);
   cursor: pointer;
   transition: width 0.3s, background 0.3s;
+  position: relative;
 }
+/* Invisible enlarged hit area so the tiny dots are easy to tap. */
+.hud-dot::after { content: ''; position: absolute; inset: -0.9rem -0.25rem; }
 .hud-dot.active { width: 1.6rem; background: #fff; }
 
 .hud button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 @media (max-width: 600px) {
-  .hud-arrow { top: auto; bottom: 4vh; transform: none; width: 2.5rem; height: 2.5rem; }
-  .hud-arrow-prev { left: 1rem; }
-  .hud-arrow-next { right: 1rem; }
-  .hud-info { width: calc(100% - 3rem); bottom: 14vh; }
+  .hud-brand { top: calc(env(safe-area-inset-top) + 1.1rem); left: calc(env(safe-area-inset-left) + 1rem); transform: none; letter-spacing: 0.35em; font-size: 0.85rem; }
+  .hud-arrow {
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 1rem);
+    transform: none;
+    width: 3rem;
+    height: 3rem;
+  }
+  .hud-arrow:active { background: rgb(255 255 255 / 0.2); }
+  .hud-arrow-prev { left: calc(env(safe-area-inset-left) + 1rem); }
+  .hud-arrow-next { right: calc(env(safe-area-inset-right) + 1rem); }
+  .hud-dots { bottom: calc(env(safe-area-inset-bottom) + 2.1rem); gap: 0.45rem; }
+  .hud-info { width: calc(100% - 2.5rem); bottom: calc(env(safe-area-inset-bottom) + 5.5rem); }
+  .hud-title { font-size: 1.7rem; }
+  .hud-desc { font-size: 0.88rem; line-height: 1.45; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .hud-info { bottom: calc(env(safe-area-inset-bottom) + 3.2rem); width: min(26rem, calc(100% - 9rem)); }
+  .hud-title { font-size: 1.3rem; margin: 0.2rem 0; }
+  .hud-desc { font-size: 0.8rem; }
+  .hud-dots { bottom: calc(env(safe-area-inset-bottom) + 1rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hud-info.swap > * { animation: none; }
