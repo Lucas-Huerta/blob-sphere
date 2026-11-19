@@ -21,6 +21,7 @@ export const chrome: MaterialDef = {
         uDispersion: { value: 0.025 },
         uContrast: { value: 1.35 },
         uF0: { value: 0.88 },
+        uImpactReact: { value: 40 },
       },
     }),
 };

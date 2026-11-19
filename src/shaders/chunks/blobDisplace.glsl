@@ -4,10 +4,53 @@ uniform float uTime;
 uniform float uAmplitude;
 uniform float uFrequency;
 
+// Click impacts: xyz = unit direction (object space), w = age in seconds (< 0 = inactive).
+#define MAX_IMPACTS 3
+uniform vec4 uImpacts[MAX_IMPACTS];
+uniform float uImpactStrength[MAX_IMPACTS];
+
+// Held pointer: xyz = lagging grab point (unit, object space), w = grip strength 0..1.
+// uGrabDrag = vector from the grab point towards the cursor (how far the surface is stretched).
+uniform vec4 uGrab;
+uniform vec3 uGrabDrag;
+
+float grabWeight(vec3 q) {
+  float ang = acos(clamp(dot(q, uGrab.xyz), -1.0, 1.0));
+  return exp(-ang * ang * 4.5) * uGrab.w;
+}
+
+// Signed radial displacement caused by clicks at point p of the unit sphere:
+// a dent that rebounds like a damped spring, plus rings travelling over the surface.
+float impactAt(vec3 p) {
+  vec3 q = normalize(p);
+  float sum = 0.0;
+  for (int i = 0; i < MAX_IMPACTS; i++) {
+    float age = uImpacts[i].w;
+    if (age < 0.0) continue;
+    float ang = acos(clamp(dot(q, uImpacts[i].xyz), -1.0, 1.0));
+    // Pressed in first (-1), then overshoots outwards and settles.
+    float spring = -exp(-age * 5.0) * cos(age * 16.0);
+    float dent = spring * exp(-ang * ang * 7.0);
+    // Ring leaving the impact point; fades with distance and time.
+    float front = age * 3.2;
+    float ring = sin(ang * 13.0 - age * 22.0)
+      * exp(-age * 2.6)
+      * exp(-ang * 0.9)
+      * smoothstep(front + 0.15, front - 0.35, ang);
+    sum += (dent * 0.26 + ring * 0.05) * uImpactStrength[i];
+  }
+  // Pressed in under the finger, more so while stretching.
+  sum -= grabWeight(q) * (0.07 + 0.2 * length(uGrabDrag));
+  return sum;
+}
+
 // Radial displacement of a point on the unit sphere.
 vec3 displace(vec3 p) {
   float n = snoise(p * uFrequency + vec3(0.0, 0.0, uTime * 0.4));
-  return p * (1.0 + n * uAmplitude);
+  vec3 d = p * (1.0 + n * uAmplitude + impactAt(p));
+  // Surface dragged towards the cursor, trailing behind it.
+  d += uGrabDrag * grabWeight(normalize(p)) * 0.9;
+  return d;
 }
 
 // Object-space normal of the displaced surface (finite differences on two tangents).

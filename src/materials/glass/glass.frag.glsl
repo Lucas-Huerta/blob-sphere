@@ -3,9 +3,11 @@ uniform vec3 uTint;
 uniform float uIor;
 uniform float uDispersion;
 uniform float uExposure;
+uniform float uImpactReact;
 
 varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
+varying float vImpact;
 
 // Refract through the front face, travel the "chord" of the (roughly spherical) body,
 // then refract again on the exit face. Falls back to internal reflection on TIR.
@@ -23,10 +25,14 @@ void main() {
   vec3 v = normalize(cameraPosition - vWorldPosition);
 
   // One refraction per colour channel, each with a slightly different IOR: dispersion.
+  // Compressed glass: local index and dispersion rise where the impact passes.
+  float stress = abs(vImpact) * uImpactReact;
+  float ior = uIor + stress * 0.3;
+  float disp = uDispersion * (1.0 + stress * 3.0);
   vec3 refracted;
-  refracted.r = textureCube(uEnvMap, throughGlass(v, n, uIor - uDispersion)).r;
-  refracted.g = textureCube(uEnvMap, throughGlass(v, n, uIor)).g;
-  refracted.b = textureCube(uEnvMap, throughGlass(v, n, uIor + uDispersion)).b;
+  refracted.r = textureCube(uEnvMap, throughGlass(v, n, ior - disp)).r;
+  refracted.g = textureCube(uEnvMap, throughGlass(v, n, ior)).g;
+  refracted.b = textureCube(uEnvMap, throughGlass(v, n, ior + disp)).b;
 
   // Absorption tint stronger where the surface faces the viewer (thicker path).
   float facing = max(dot(n, v), 0.0);

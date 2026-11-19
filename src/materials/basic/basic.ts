@@ -28,6 +28,7 @@ function makeBasic(v: Variant): MaterialDef {
           uAmplitude: { value: v.amplitude },
           uFrequency: { value: v.frequency },
           uColor: { value: new THREE.Color(v.color) },
+          uImpactReact: { value: 4 },
         },
       }),
   };

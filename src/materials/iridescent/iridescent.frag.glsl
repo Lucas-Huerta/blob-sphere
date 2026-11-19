@@ -7,10 +7,12 @@ uniform float uThicknessMin; // nm
 uniform float uThicknessMax; // nm
 uniform float uSwirlScale;
 uniform float uIntensity;
+uniform float uImpactReact;
 
 varying vec3 vWorldNormal;
 varying vec3 vWorldPosition;
 varying vec3 vObjPosition;
+varying float vImpact;
 
 const float PI = 3.14159265359;
 
@@ -33,6 +35,7 @@ float filmThickness() {
   float n = snoise(q + warp * 0.9);
   float t = 0.5 + 0.5 * n;
   t += -0.25 * vWorldPosition.y; // gravity
+  t += vImpact * uImpactReact; // soap film pushed around by the impact
   return mix(uThicknessMin, uThicknessMax, clamp(t, 0.0, 1.0));
 }
 

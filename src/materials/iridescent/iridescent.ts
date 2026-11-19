@@ -23,6 +23,7 @@ export const iridescent: MaterialDef = {
         uThicknessMax: { value: 720 },
         uSwirlScale: { value: 1.6 },
         uIntensity: { value: 1.0 },
+        uImpactReact: { value: 3 },
       },
     }),
 };

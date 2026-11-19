@@ -3,7 +3,8 @@ import type { Carousel } from '@/carousel/Carousel';
 const THRESHOLD = 60; // px
 
 /** Horizontal swipe / drag on an element changes the carousel item. */
-export function bindSwipe(el: HTMLElement, carousel: Carousel): void {
+/** `isBlocked` lets another interaction (e.g. dragging the blob) claim the gesture. */
+export function bindSwipe(el: HTMLElement, carousel: Carousel, isBlocked: () => boolean = () => false): void {
   let startX = 0;
   let startY = 0;
   el.addEventListener('pointerdown', (e) => {
@@ -11,6 +12,7 @@ export function bindSwipe(el: HTMLElement, carousel: Carousel): void {
     startY = e.clientY;
   });
   el.addEventListener('pointerup', (e) => {
+    if (isBlocked()) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     if (Math.abs(dx) < THRESHOLD || Math.abs(dx) < Math.abs(dy) * 1.5) return;
