@@ -7,6 +7,7 @@ export const glass: MaterialDef = {
   id: 'glass',
   order: 20,
   name: 'Dispersive Glass',
+  category: 'mineral',
   description: 'Refractive crystal splitting light into colour fringes.',
   background: '#080e16',
   create: ({ envMap }) =>

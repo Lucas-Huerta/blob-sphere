@@ -94,22 +94,21 @@ export class App {
     this.cameraDistanceTarget = 5;
   }
 
-  /** Shrink the blob, swap its material, then let it spring back. */
+  /** Spin the blob one full turn in the navigation direction, swapping the material mid-turn. */
   private transitionTo(index: number): void {
     const def = materials[index];
     this.timeline?.kill();
     this.setBackground(index);
     if (this.reducedMotion.matches) {
       this.blob.setMaterial(def);
-      this.blob.mesh.scale.setScalar(1);
       return;
     }
-    const scale = this.blob.mesh.scale;
+    // "next" sweeps the front surface to the left, "prev" to the right.
+    const spinTo = this.blob.spin - this.carousel.direction * Math.PI * 2;
     this.timeline = gsap
       .timeline()
-      .to(scale, { x: 0.55, y: 0.55, z: 0.55, duration: 0.25, ease: 'power2.in' })
-      .call(() => this.blob.setMaterial(def))
-      .to(scale, { x: 1, y: 1, z: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' });
+      .to(this.blob, { spin: spinTo, duration: 0.7, ease: 'power3.inOut' }, 0)
+      .call(() => this.blob.setMaterial(def), undefined, 0.3);
   }
 
   private setBackground(index: number): void {

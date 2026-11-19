@@ -7,6 +7,7 @@ export const iridescent: MaterialDef = {
   id: 'iridescent',
   order: 30,
   name: 'Iridescent Bubble',
+  category: 'light',
   description: 'Soap-bubble thin film: colours shift with angle and thickness.',
   background: '#0a0712',
   create: ({ envMap }) =>

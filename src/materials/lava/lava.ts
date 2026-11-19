@@ -7,6 +7,7 @@ export const lava: MaterialDef = {
   id: 'lava',
   order: 40,
   name: 'Molten Lava',
+  category: 'light',
   description: 'Dark crust split by glowing, drifting cracks of magma.',
   background: '#110605',
   create: () =>
