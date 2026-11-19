@@ -1,0 +1,143 @@
+.hc-button {
+  position: fixed;
+  top: 3.2vh;
+  right: 1.5rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.06);
+  backdrop-filter: blur(8px);
+  color: #f2f2f7;
+  font: 500 0.82rem ui-sans-serif, system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.hc-button:hover { background: rgb(255 255 255 / 0.16); }
+.hc-button.active { border-color: rgb(120 255 190 / 0.6); }
+.hc-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.hc-status { font-weight: 400; opacity: 0.7; padding-left: 0.55rem; border-left: 1px solid rgb(255 255 255 / 0.25); }
+.hc-status[data-seen='true'] { color: #8ff0bf; opacity: 1; }
+
+.hc-dialog {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f2f2f7;
+  max-width: none;
+  max-height: none;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.hc-dialog::backdrop { background: rgb(5 5 10 / 0.62); backdrop-filter: blur(6px); }
+.hc-dialog[open] { animation: hc-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes hc-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.hc-card {
+  position: relative;
+  box-sizing: border-box;
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.6rem 1.6rem 1.3rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  background: rgb(22 22 30 / 0.9);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.5);
+}
+.hc-step { margin: 0 0 0.9rem; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.5; }
+.hc-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.hc-close:hover:not(:disabled) { opacity: 1; background: rgb(255 255 255 / 0.1); }
+.hc-close:disabled { opacity: 0.2; cursor: default; }
+
+.hc-body { min-height: 17rem; }
+.hc-body h2 { margin: 0 0 0.6rem; font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; outline: none; }
+.hc-body p { margin: 0 0 0.9rem; font-size: 0.93rem; line-height: 1.55; opacity: 0.78; }
+
+.hc-art {
+  height: 8.5rem;
+  margin-bottom: 1.1rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: radial-gradient(circle at 50% 40%, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.02));
+}
+.hc-art svg { display: block; width: 100%; height: 100%; }
+.hc-art .fill { fill: rgb(190 200 255 / 0.85); }
+.hc-art .fill-soft { fill: rgb(190 200 255 / 0.18); }
+.hc-art .stroke { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.hc-art .dot { fill: #8ff0bf; }
+.hc-art .hand-icon { stroke-width: 1.1; }
+.art-pinch { transform-origin: 60px 48px; animation: hc-pinch 2.4s ease-in-out infinite; }
+.art-zoom { transform-origin: 60px 48px; animation: hc-zoom 2.8s ease-in-out infinite; }
+.art-arrows { animation: hc-arrows 2.8s ease-in-out infinite; transform-origin: 60px 48px; }
+.art-follow { animation: hc-follow 3.2s ease-in-out infinite; }
+.art-hand-move { animation: hc-follow-hand 3.2s ease-in-out infinite; }
+.art-hand { animation: hc-wave 2.4s ease-in-out infinite; transform-origin: 12px 22px; }
+@keyframes hc-pinch { 0%, 100% { transform: scale(1.25); } 50% { transform: scale(0.75); } }
+@keyframes hc-zoom { 0%, 100% { transform: scale(0.8); } 50% { transform: scale(1.3); } }
+@keyframes hc-arrows { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(0.75); opacity: 0.5; } }
+@keyframes hc-follow { 0%, 100% { transform: translateX(-16px); } 50% { transform: translateX(16px); } }
+@keyframes hc-follow-hand { 0%, 100% { transform: translateX(-6px); } 50% { transform: translateX(6px); } }
+@keyframes hc-wave { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+
+.hc-legal {
+  padding: 0.8rem 0.95rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgb(143 240 191 / 0.3);
+  background: rgb(143 240 191 / 0.07);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.hc-legal ul { margin: 0.4rem 0 0; padding-left: 1.1rem; opacity: 0.85; }
+.hc-legal li + li { margin-top: 0.3rem; }
+.hc-error { margin-top: 0.9rem !important; color: #ff9d9d; opacity: 1 !important; }
+
+.hc-dots { display: flex; justify-content: center; gap: 0.4rem; margin: 0.5rem 0 1.1rem; }
+.hc-dot { width: 0.4rem; height: 0.4rem; border-radius: 999px; background: rgb(255 255 255 / 0.25); transition: width 0.3s, background 0.3s; }
+.hc-dot.active { width: 1.3rem; background: #fff; }
+
+.hc-actions { display: flex; justify-content: space-between; gap: 0.7rem; }
+.hc-btn { padding: 0.7rem 1.2rem; border-radius: 999px; border: 1px solid transparent; font: 600 0.88rem inherit; font-family: inherit; cursor: pointer; transition: background 0.2s, opacity 0.2s; }
+.hc-btn:disabled { opacity: 0.5; cursor: default; }
+.hc-primary { margin-left: auto; background: #fff; color: #111; }
+.hc-primary:hover:not(:disabled) { background: #e6e6ee; }
+.hc-ghost { background: transparent; border-color: rgb(255 255 255 / 0.25); color: inherit; }
+.hc-ghost:hover:not(:disabled) { background: rgb(255 255 255 / 0.1); }
+.hc-dialog button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .hc-button { top: auto; bottom: calc(4vh + 3.2rem); right: 50%; transform: translateX(50%); }
+  .hc-body { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hc-dialog[open], .hc-art * { animation: none !important; }
+  .hc-button, .hc-dot, .hc-btn { transition: none; }
+}
+
+.hc-cursor {
+  position: fixed;
+  top: -0.8rem;
+  left: -0.8rem;
+  z-index: 4;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.8);
+  pointer-events: none;
+  transition: width 0.15s, height 0.15s, margin 0.15s, background 0.15s;
+}
+.hc-cursor.pinching { margin: 0.45rem; width: 0.7rem; height: 0.7rem; background: #8ff0bf; border-color: #8ff0bf; }
