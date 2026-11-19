@@ -5,6 +5,7 @@ import fragmentShader from './holographic.frag.glsl';
 
 export const holographic: MaterialDef = {
   id: 'holographic',
+  order: 60,
   name: 'Holographic Foil',
   description: 'Rainbow foil that shifts with the angle, with scanlines and a sweeping glitch band.',
   background: '#050a12',

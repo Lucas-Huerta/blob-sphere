@@ -5,6 +5,7 @@ import fragmentShader from './iridescent.frag.glsl';
 
 export const iridescent: MaterialDef = {
   id: 'iridescent',
+  order: 30,
   name: 'Iridescent Bubble',
   description: 'Soap-bubble thin film: colours shift with angle and thickness.',
   background: '#0a0712',

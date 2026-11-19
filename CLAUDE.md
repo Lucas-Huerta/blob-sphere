@@ -143,7 +143,8 @@ blob-sphere/
     │   ├── Blob.ts            # mesh + géométrie + application d'un matériau + déformations
     │   └── deformation.ts     # état de déformation (poke, pinch, stretch) → uniforms
     ├── materials/
-    │   ├── index.ts           # registre ordonné des matériaux (alimente le carrousel)
+    │   ├── index.ts           # registre : découvre automatiquement les matériaux (import.meta.glob)
+    │   ├── registry.ts        # collectMaterials() : rassemble, trie par `order`, refuse les ids en double
     │   ├── types.ts           # interface MaterialDef { id, name, description, create(), uniforms }
     │   ├── chrome/            # un dossier par matériau
     │   │   ├── chrome.ts      # fabrique le ShaderMaterial + réglages
@@ -170,7 +171,7 @@ blob-sphere/
 ```
 
 ### Principes d'architecture
-- **Un matériau = un dossier autonome** (fabrique + GLSL). Ajouter un matériau = créer le dossier + l'inscrire dans `materials/index.ts`. Aucun autre fichier à toucher.
+- **Un matériau = un dossier autonome** (fabrique + GLSL). Ajouter un matériau = créer le dossier et exporter un `MaterialDef` avec son `order` (position dans le carrousel) ; le registre le découvre automatiquement, **aucun fichier partagé à modifier** (donc pas de conflit entre PRs de matériaux). Ordres utilisés : 10 chrome, 20 verre, 30 iridescent, 900+ placeholders ; en prendre un libre dans l'intervalle voulu.
 - **Le carrousel ne connaît que le registre** de matériaux (id, nom, description) ; il émet un événement `change(index)`, `App` demande au `Blob` d'appliquer le matériau.
 - **Les inputs sont découplés** : souris, clavier et (V2) mains produisent tous les mêmes **intentions** (`next`, `prev`, `poke(point)`, `grab(point)`, `stretch(factor)`, `rotate(dx, dy)`). `App` les route vers `Carousel`/`Blob`. Cela permet d'ajouter le hand tracking sans modifier le reste.
 - **`gestures.ts` est une fonction pure** (landmarks in → gestes out) pour être testée sans caméra.
