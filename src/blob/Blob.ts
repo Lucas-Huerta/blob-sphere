@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { blendThreshold, patchForBlend } from '@/blob/blend';
+import { DEFAULT_SHAPE, getShape, shapeModeValue, type ShapeDef, type ShapeId } from '@/blob/shapes';
 import type { MaterialContext, MaterialDef } from '@/materials/types';
 
 const MAX_IMPACTS = 3;
 /** Seconds after which a click no longer influences the surface. */
 const IMPACT_LIFETIME = 3;
+/** How much the body swells at the end of an inhale (see `breath`). */
+const BREATH_SWELL = 0.2;
 /** Spring constants of the whole-body recoil. */
 const RECOIL_STIFFNESS = 90;
 const RECOIL_DAMPING = 7;
@@ -19,6 +22,13 @@ export class Blob {
     uGrab: { value: new THREE.Vector4(0, 0, 1, 0) },
     uGrabDrag: { value: new THREE.Vector3() },
   };
+  /** Shape uniforms shared by every material, like the impacts. */
+  private shapeUniforms = {
+    uShapeMode: { value: 0 },
+    uShapeMorph: { value: 1 },
+    uShapeAmp: { value: 1 },
+  };
+  private shapeDef: ShapeDef = getShape(DEFAULT_SHAPE);
   private grabHeld = false;
   private grabTarget = new THREE.Vector3(0, 0, 1);
   private grabCurrent = new THREE.Vector3(0, 0, 1);
@@ -38,6 +48,8 @@ export class Blob {
   speed = 1;
   /** Called whenever the primary or the blend material instance changes. */
   onMaterialsChanged?: () => void;
+  /** Called after the base shape changed. */
+  onShapeChanged?: () => void;
 
   private animTime = 0;
   private blendDef: MaterialDef | null = null;
@@ -57,14 +69,56 @@ export class Blob {
   /** Extra yaw (radians) driven by the carousel transition. */
   spin = 0;
 
+  /** Low-poly shape only: 0 = crisp icosahedron, 1 = melted into the blob. */
+  morph = 1;
+  /** Body scale used to pop one shape out and the next in (animated by the app). */
+  shapeScale = 1;
+  /** Lung fill, 0 (empty) to 1 (full): swells the body (see chill mode). */
+  breath = 0;
+  /** Calm factor on the animation clock; below 1 everything flows slower. */
+  tempo = 1;
+
   constructor(def: MaterialDef, private ctx: MaterialContext) {
-    const geometry = new THREE.IcosahedronGeometry(1, 64);
+    const geometry = this.shapeDef.createGeometry();
     this.mesh = new THREE.Mesh(geometry, def.create(this.ctx));
     this.attachShared(this.material, true);
     // The partner of a blend rides along as a child so it follows every transform of the body.
     this.blendMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial()); // placeholder until used
     this.blendMesh.visible = false;
     this.mesh.add(this.blendMesh);
+  }
+
+  get shape(): ShapeDef {
+    return this.shapeDef;
+  }
+
+  /** Swap the base geometry (the partner of a blend follows). Materials are untouched. */
+  setShape(id: ShapeId): void {
+    if (id === this.shapeDef.id) return;
+    const next = getShape(id);
+    const previous = this.mesh.geometry;
+    const geometry = next.createGeometry();
+    this.mesh.geometry = geometry;
+    this.blendMesh.geometry = geometry;
+    previous.dispose();
+    this.shapeDef = next;
+    // Stale click / grab points belong to the old surface.
+    this.impactStart.fill(-1);
+    this.grabHeld = false;
+    this.grabStrength = 0;
+    this.syncShapeUniforms();
+    this.onShapeChanged?.();
+  }
+
+  private syncShapeUniforms(): void {
+    this.shapeUniforms.uShapeMode.value = shapeModeValue(this.shapeDef);
+    this.shapeUniforms.uShapeMorph.value = this.morph;
+    this.shapeUniforms.uShapeAmp.value = this.shapeDef.reliefScale;
+  }
+
+  /** Points live on the unit sphere for radial shapes, and are plain positions on free surfaces. */
+  private toSurfacePoint(local: THREE.Vector3): THREE.Vector3 {
+    return this.shapeDef.mode === 'surface' ? local : local.normalize();
   }
 
   get material(): THREE.ShaderMaterial {
@@ -141,7 +195,7 @@ export class Blob {
     if (!hit) return false;
 
     const s = strength * this.motionScale;
-    const local = this.mesh.worldToLocal(hit.point.clone()).normalize();
+    const local = this.toSurfacePoint(this.mesh.worldToLocal(hit.point.clone()));
     const i = this.nextImpact;
     this.nextImpact = (i + 1) % MAX_IMPACTS;
     this.impactUniforms.uImpacts.value[i].set(local.x, local.y, local.z, 0);
@@ -161,16 +215,38 @@ export class Blob {
   grab(ndc: THREE.Vector2, camera: THREE.Camera): void {
     this.mesh.updateMatrixWorld();
     this.raycaster.setFromCamera(ndc, camera);
-    const ray = this.raycaster.ray;
-    const sphere = new THREE.Sphere(this.mesh.position, this.mesh.scale.x);
-    // Hit on the sphere, or else the closest ray point to the centre (cursor off the blob).
-    const world = ray.intersectSphere(sphere, new THREE.Vector3()) ?? ray.closestPointToPoint(sphere.center, new THREE.Vector3());
-    const local = this.mesh.worldToLocal(world).normalize();
+    const local = this.toSurfacePoint(this.mesh.worldToLocal(this.grabPointWorld()));
     this.grabTarget.copy(local);
     if (!this.grabHeld) {
       this.grabCurrent.copy(local);
       this.grabHeld = true;
     }
+  }
+
+  /** World point under the ray (set on the raycaster): a hit, or the closest silhouette point. */
+  private grabPointWorld(): THREE.Vector3 {
+    const ray = this.raycaster.ray;
+    if (this.shapeDef.mode === 'surface') {
+      const hit = this.raycaster.intersectObject(this.mesh, false)[0];
+      if (hit) return hit.point;
+      // Off the shape: pull towards the vertex nearest to the ray.
+      const positions = this.mesh.geometry.getAttribute('position');
+      const world = new THREE.Vector3();
+      let best = Infinity;
+      const nearest = new THREE.Vector3();
+      for (let i = 0; i < positions.count; i += 3) {
+        world.fromBufferAttribute(positions, i).applyMatrix4(this.mesh.matrixWorld);
+        const d = ray.distanceSqToPoint(world);
+        if (d < best) {
+          best = d;
+          nearest.copy(world);
+        }
+      }
+      return nearest;
+    }
+    const sphere = new THREE.Sphere(this.mesh.position, this.mesh.scale.x);
+    // Hit on the sphere, or else the closest ray point to the centre (cursor off the blob).
+    return ray.intersectSphere(sphere, new THREE.Vector3()) ?? ray.closestPointToPoint(sphere.center, new THREE.Vector3());
   }
 
   releaseGrab(): void {
@@ -201,7 +277,8 @@ export class Blob {
 
     // Grab: lagging point chases the target; grip fades in/out.
     const catchUp = 1 - Math.exp(-dt * 9);
-    this.grabCurrent.lerp(this.grabTarget, catchUp).normalize();
+    this.grabCurrent.lerp(this.grabTarget, catchUp);
+    if (this.shapeDef.mode !== 'surface') this.grabCurrent.normalize();
     const goal = this.grabHeld ? this.motionScale : 0;
     this.grabStrength += (goal - this.grabStrength) * (1 - Math.exp(-dt * (this.grabHeld ? 14 : 7)));
     const grab = this.impactUniforms.uGrab.value;
@@ -215,7 +292,9 @@ export class Blob {
     this.velocity.multiplyScalar(Math.max(0, 1 - RECOIL_DAMPING * dt));
     pos.addScaledVector(this.velocity, dt);
 
-    this.animTime += dt * this.speed;
+    this.animTime += dt * this.speed * this.tempo;
+    this.syncShapeUniforms();
+    this.mesh.scale.setScalar(Math.max(this.shapeScale, 0.001) * (1 + BREATH_SWELL * this.breath * this.motionScale));
     this.material.uniforms.uTime.value = this.animTime;
     const partner = this.blendMesh.visible ? this.blendMaterial : null;
     if (partner) {
@@ -236,7 +315,7 @@ export class Blob {
   /** Wire the uniforms and shader patch every blob material needs (impacts, blend dissolve). */
   private attachShared(material: THREE.ShaderMaterial, primary: boolean): void {
     const u = material.uniforms;
-    Object.assign(u, this.impactUniforms, {
+    Object.assign(u, this.impactUniforms, this.shapeUniforms, {
       uBlend: this.blendUniforms.uBlend,
       uBlendSide: { value: primary ? 1 : -1 },
       uShapeBlend: primary ? this.blendUniforms.shapeA : this.blendUniforms.shapeB,

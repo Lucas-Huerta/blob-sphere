@@ -1,0 +1,93 @@
+/* Chill button: third in the top-right stack (camera, Mix, Chill). */
+.chill-button {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 3.2vh + 3.4rem + 2.9rem);
+  right: calc(env(safe-area-inset-right) + 1.5rem);
+  z-index: 19;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(14 14 20 / 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #f2f2f7;
+  font: 500 0.8rem ui-sans-serif, system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.chill-button:hover, .chill-button[aria-pressed='true'] { background: rgb(255 255 255 / 0.16); }
+.chill-button[aria-pressed='true'] { border-color: rgb(159 212 255 / 0.55); }
+.chill-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.chill-guide {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 7vh);
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(24rem, calc(100% - 2rem));
+  text-align: center;
+  color: #f2f2f7;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+  animation: chill-in 1.2s ease both;
+}
+.chill-guide[hidden] { display: none; }
+@keyframes chill-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.chill-ring { position: relative; width: 5.2rem; height: 5.2rem; }
+.chill-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.chill-track, .chill-arc { fill: none; stroke-width: 2.4; }
+.chill-track { stroke: rgb(255 255 255 / 0.14); }
+.chill-arc { stroke: #bfe3ff; stroke-linecap: round; }
+.chill-guide[data-phase='hold'] .chill-arc { stroke: #ffe3a8; }
+.chill-guide[data-phase='exhale'] .chill-arc { stroke: #c9b8ff; }
+.chill-count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+}
+.chill-phase { margin: 0.9rem 0 0.25rem; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.32em; padding-left: 0.32em; text-transform: uppercase; }
+.chill-hint { margin: 0; font-size: 0.9rem; opacity: 0.65; }
+
+.chill-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Focus: everything else fades out, the blob and the guide remain. */
+.hud-arrow, .hud-dots, .hud-info, .hud-brand, .mix-button, .mix-panel, .hc-button, .lil-gui.lil-root {
+  transition: opacity 0.9s ease, visibility 0.9s;
+}
+body.chill-mode .hud-arrow,
+body.chill-mode .hud-dots,
+body.chill-mode .hud-info,
+body.chill-mode .hud-brand,
+body.chill-mode .mix-button,
+body.chill-mode .mix-panel,
+body.chill-mode .hc-button,
+body.chill-mode .lil-gui.lil-root {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .chill-button { top: calc(env(safe-area-inset-top) + 0.7rem + 3rem + 2.9rem); right: calc(env(safe-area-inset-right) + 0.8rem); }
+  .chill-guide { bottom: calc(env(safe-area-inset-bottom) + 3.5rem); }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .chill-guide { bottom: calc(env(safe-area-inset-bottom) + 0.8rem); }
+  .chill-ring { width: 3.6rem; height: 3.6rem; }
+  .chill-count { font-size: 1.3rem; }
+  .chill-phase { margin-top: 0.4rem; font-size: 1.1rem; }
+  .chill-hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chill-guide { animation: none; }
+  .hud-arrow, .hud-dots, .hud-info, .hud-brand, .mix-button, .mix-panel, .hc-button, .lil-gui.lil-root { transition: none; }
+}

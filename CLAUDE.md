@@ -11,6 +11,11 @@ Projet web qui affiche sur sa page principale une **sphère 3D déformable (« b
 - Interaction souris/tactile de base : rotation (orbit) et « poke » du blob au survol/clic.
 - Nom + courte description du matériau affichés sous le blob.
 
+### V1.5 — Formes, effets, mode chill
+- **Formes de base** (réglage « Base shape » : *Auto* = la forme préférée du matériau via `MaterialDef.shape`, sinon sphère) : sphère, **icosaèdre bas-poly** (cristallise depuis le blob, curseur « Melt into blob » pour le refondre), **tore**, **nœud**. Changement animé (le corps rétrécit, la géométrie est échangée, il revient).
+- **Post-process** (dossier « Effects » des réglages) : **bloom**, **grain**, **aberration chromatique** globale, et **poussière flottante** (particules additives, teintées selon le fond du matériau) pour la profondeur. Tous à 0 = rendu direct sans composer.
+- **Mode chill** (bouton « Chill ») : respiration guidée **4-7-8** (inspire 4 s, retiens 7 s, expire 8 s). Le blob gonfle puis se dégonfle, l'animation et la poussière ralentissent, le reste de l'interface s'efface. `Échap` ou « Exit chill » pour sortir.
+
 ### V2 — Contrôle par la main (fonctionnalité additionnelle, plus tard)
 - Accès webcam (`getUserMedia`), détection des mains en temps réel.
 - Gestes :
@@ -138,9 +143,12 @@ blob-sphere/
     ├── core/
     │   ├── renderer.ts        # WebGLRenderer, resize, boucle rAF
     │   ├── scene.ts           # scène, caméra, lumières, environnement
+    │   ├── effects.ts         # EffectComposer : highlights → bloom → output → finish (grain + aberration) ; réglages + poussière
+    │   ├── dust.ts            # poussière flottante (Points additifs, animée dans le vertex shader)
     │   └── clock.ts           # temps, delta, pause visibilité
     ├── blob/
     │   ├── Blob.ts            # mesh + géométrie + application d'un matériau + déformations
+    │   ├── shapes.ts          # formes de base (sphère, bas-poly, tore, nœud) : géométrie + mode de déplacement
     │   └── deformation.ts     # état de déformation (poke, pinch, stretch) → uniforms
     ├── materials/
     │   ├── index.ts           # registre : découvre automatiquement les matériaux (import.meta.glob)
@@ -154,6 +162,9 @@ blob-sphere/
     │   └── …
     ├── shaders/
     │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl, refraction.glsl, worley.glsl (+ à venir : fresnel, tonemap)
+    ├── chill/
+    │   ├── breathing.ts       # 4-7-8 : temps → phase / remplissage des poumons — pur, testé
+    │   └── ChillMode.ts       # état du mode (actif, niveau lissé, calme), sans DOM
     ├── carousel/
     │   ├── Carousel.ts        # état (index courant), navigation, événements
     │   └── carousel.css
@@ -167,6 +178,7 @@ blob-sphere/
     │       └── HandOverlay.ts       # rendu 2D des mains pour le feedback
     ├── ui/
     │   ├── hud.ts             # nom du matériau, pagination, bouton « activer la caméra »
+    │   ├── chill.ts           # bouton Chill + guide de respiration ; la classe `chill-mode` sur <body> efface le reste de l'UI
     │   ├── settings.ts        # panneau lil-gui : vitesse + sliders/couleurs générés depuis les uniforms
     │   ├── mix.ts             # bouton « Mix » : choix du matériau partenaire dans la liste + slider de mélange
     │   └── uniformControls.ts # uniforms → contrôles (plages connues par nom, sinon dérivées de la valeur par défaut)
@@ -174,6 +186,8 @@ blob-sphere/
 ```
 
 ### Principes d'architecture
+- **Formes de base** : tout vertex shader passe par `blobDisplace.glsl`, qui gère trois modes (`uShapeMode`) : sphère, bas-poly (rayon radial d'un icosaèdre qui fond vers 1 via `uShapeMorph`) et **surface libre** (tore, nœud : déplacement le long de la normale de la géométrie, relief réduit par `uShapeAmp`). Un matériau qui ajoute son propre relief (hook `BLOB_SURFACE`) doit utiliser `blobPoint(p)` (au lieu de `normalize(p)`), `blobUp(d)` et `blobRelief()` pour rester correct sur toutes les formes (voir ferrofluide). Les points de poke/grab sont des directions sur la sphère, ou des positions sur les surfaces libres (`Blob.toSurfacePoint`).
+- **Post-process** : les matériaux écrivent parfois des couleurs bien > 1 (reflets du chrome) : `highlights.frag.glsl` compresse tout ce qui dépasse 1 avant le bloom, sinon tout l'écran s'embrase. Le canvas reste transparent (alpha prémultiplié) : le fond de page est toujours le `--bg` CSS.
 - **Panneau de réglages et mélange** (le mélange a son propre bouton `MixPanel`, hors settings) : le panneau est généré depuis les uniforms nommés de chaque matériau (tout `float` et `THREE.Color`, hors uniforms moteur). Un nouveau matériau a donc ses sliders sans rien toucher ; pour une plage spécifique, l'ajouter à `RANGES` dans `uniformControls.ts`. Le mélange rend deux meshes (primaire + partenaire en enfant) : chaque matériau est patché (`blend.ts`) pour jeter les fragments selon un masque de bruit par sommet (dissolve), et la forme est morphée via `uShapeBlend`/`uOther*` dans `blobDisplace.glsl`. Tout vertex shader de matériau doit inclure ce chunk et avoir un `void main() {` littéral.
 - **Un matériau = un dossier autonome** (fabrique + GLSL). Ajouter un matériau = créer le dossier et exporter un `MaterialDef` avec son `order` (position dans le carrousel) ; le registre le découvre automatiquement, **aucun fichier partagé à modifier** (donc pas de conflit entre PRs de matériaux). Ordres utilisés : 10 chrome, 20 verre, 30 iridescent, 900+ placeholders ; en prendre un libre dans l'intervalle voulu.
 - **Le carrousel ne connaît que le registre** de matériaux (id, nom, description) ; il émet un événement `change(index)`, `App` demande au `Blob` d'appliquer le matériau.
@@ -225,7 +239,7 @@ pnpm test           # Vitest
 8. Polish : responsive mobile, chargement, déploiement (Vercel/Netlify/GitHub Pages).
 
 ## Questions ouvertes
-- Un blob par matériau avec une forme de base différente, ou toujours la même sphère avec seulement le matériau qui change ?
+- ~~Un blob par matériau avec une forme de base différente, ou toujours la même sphère ?~~ Tranché : forme au choix, *Auto* suit la forme préférée du matériau (`shape` dans `MaterialDef`, ex. cristal → bas-poly), sphère par défaut.
 - Fond de page : couleur/dégradé qui s'adapte au matériau courant ?
 - Support mobile pour le hand tracking (perfs caméra + GPU) ou desktop uniquement ?
 - Hébergement cible.

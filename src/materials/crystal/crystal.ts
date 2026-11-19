@@ -8,6 +8,7 @@ export const crystal: MaterialDef = {
   order: 160,
   name: 'Faceted Crystal',
   category: 'mineral',
+  shape: 'lowpoly',
   description: 'Cut gemstone: flat facets that bend light, sparkle and meet in bright edges.',
   background: '#0d0818',
   create: ({ envMap }) =>

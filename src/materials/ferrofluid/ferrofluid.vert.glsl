@@ -14,7 +14,7 @@ varying vec3 vWorldPosition;
 varying float vImpact;
 varying float vSpike;
 
-// Spike height in 0..1 at a point of the unit sphere: one cone per Worley cell.
+// Spike height in 0..1 at a point of the base shape (blobPoint): one cone per Worley cell.
 float spikeAt(vec3 q) {
   float cone = clamp(1.0 - worley(q * uSpikeScale) / uSpikeRadius, 0.0, 1.0);
   float h = pow(cone, uSpikeSharp);
@@ -28,13 +28,13 @@ float spikeAt(vec3 q) {
 
 vec3 ferroSurface(vec3 p) {
   vec3 d = displace(p);
-  return d + normalize(d) * spikeAt(normalize(p)) * uSpikeHeight;
+  return d + blobUp(d) * spikeAt(blobPoint(p)) * uSpikeHeight * blobRelief();
 }
 
 void main() {
   vec3 p = position;
   vImpact = impactAt(p);
-  vSpike = spikeAt(normalize(p));
+  vSpike = spikeAt(blobPoint(p));
   vWorldNormal = normalize(mat3(modelMatrix) * blobNormal(p));
   vec4 world = modelMatrix * vec4(ferroSurface(p), 1.0);
   vWorldPosition = world.xyz;

@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { createEnvironment } from '@/core/environment';
+import { Effects } from '@/core/effects';
+import { ChillMode } from '@/chill/ChillMode';
+import { resolveShape, type ShapeChoice } from '@/blob/shapes';
 import { Blob } from '@/blob/Blob';
 import { Carousel } from '@/carousel/Carousel';
 import { bindKeyboard } from '@/input/keyboard';
@@ -13,6 +16,7 @@ import { Hud } from '@/ui/hud';
 import { HandControlUi } from '@/ui/handControl';
 import { SettingsPanel } from '@/ui/settings';
 import { MixPanel } from '@/ui/mix';
+import { ChillUi } from '@/ui/chill';
 
 export class App {
   private renderer = new THREE.WebGLRenderer({
@@ -33,6 +37,12 @@ export class App {
   private cameraDistance = 5;
   private cameraDistanceTarget = 5;
   private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  private effects: Effects;
+  private chill = new ChillMode();
+  private chillUi: ChillUi;
+  private lastTime = 0;
+  private shapeChoice: ShapeChoice = 'auto';
+  private shapeTimeline?: gsap.core.Timeline;
 
   constructor(private container: HTMLElement) {
     // Phones have dense screens and weak GPUs: cap the pixel ratio lower than on desktop.
@@ -41,14 +51,23 @@ export class App {
     container.appendChild(this.renderer.domElement);
     this.camera.position.set(0, 0, 5);
     this.scene.add(this.blob.mesh);
+    this.effects = new Effects(this.renderer, this.scene, this.camera, this.coarsePointer);
+    this.effects.animateGrain = !this.reducedMotion.matches;
     window.addEventListener('resize', this.resize);
     this.resize();
     this.cameraDistance = this.cameraDistanceTarget;
     this.camera.position.z = this.cameraDistance;
 
     new Hud(document.body, materials, this.carousel);
-    new SettingsPanel(this.blob, materials, this.carousel);
+    new SettingsPanel(this.blob, materials, this.carousel, {
+      effects: this.effects,
+      shape: (choice) => {
+        this.shapeChoice = choice;
+        this.applyShape();
+      },
+    });
     new MixPanel(document.body, this.blob, materials, this.carousel);
+    this.chillUi = new ChillUi(document.body, this.chill);
     this.setupHands();
     bindKeyboard(this.carousel);
     // Registered first so `grabbed` is already up to date when the swipe handler reads it.
@@ -59,17 +78,34 @@ export class App {
     });
     bindSwipe(this.renderer.domElement, this.carousel, () => poke.grabbed);
     this.blob.motionScale = this.reducedMotion.matches ? 0.3 : 1;
-    this.reducedMotion.addEventListener('change', (e) => (this.blob.motionScale = e.matches ? 0.3 : 1));
+    this.reducedMotion.addEventListener('change', (e) => {
+      this.blob.motionScale = e.matches ? 0.3 : 1;
+      this.effects.animateGrain = !e.matches;
+    });
     this.carousel.onChange((i) => this.transitionTo(i));
     this.setBackground(0);
   }
 
   start(): void {
     this.renderer.setAnimationLoop(() => {
-      this.blob.update(this.clock.getElapsedTime());
+      const time = this.clock.getElapsedTime();
+      // Clamped so a hidden tab does not fast-forward the breathing guide on return.
+      const dt = Math.min(time - this.lastTime, 0.1);
+      this.lastTime = time;
+
+      // Chill mode: the body swells with the breath and everything else slows down.
+      this.chill.update(dt);
+      this.chillUi.update();
+      const calm = this.chill.calm;
+      this.blob.breath = this.chill.level;
+      this.blob.tempo = 1 - 0.55 * calm;
+      this.effects.dust.speed = 1 - 0.6 * calm;
+      this.effects.bloomBoost = 0.3 * this.chill.level;
+
+      this.blob.update(time);
       this.cameraDistance += (this.cameraDistanceTarget - this.cameraDistance) * 0.12;
       this.camera.position.z = this.cameraDistance;
-      this.renderer.render(this.scene, this.camera);
+      this.effects.render(dt);
     });
   }
 
@@ -113,6 +149,7 @@ export class App {
     const def = materials[index];
     this.timeline?.kill();
     this.setBackground(index);
+    this.applyShape();
     if (this.reducedMotion.matches) {
       this.blob.setMaterial(def);
       return;
@@ -125,13 +162,42 @@ export class App {
       .call(() => this.blob.setMaterial(def), undefined, 0.3);
   }
 
+  /**
+   * Show the shape asked for (a fixed choice, or the current material's preference on Auto):
+   * the body pops out, the geometry is swapped, and it pops back in. The low-poly shape starts
+   * as a blob and crystallises into its icosahedron.
+   */
+  private applyShape(): void {
+    const id = resolveShape(this.shapeChoice, materials[this.carousel.index].shape);
+    if (id === this.blob.shape.id && !this.shapeTimeline?.isActive()) return;
+    this.shapeTimeline?.kill();
+    const swap = (): void => {
+      this.blob.setShape(id);
+      this.blob.morph = id === 'lowpoly' && this.reducedMotion.matches ? 0 : 1;
+    };
+    if (this.reducedMotion.matches) {
+      this.blob.shapeScale = 1;
+      swap();
+      return;
+    }
+    const timeline = gsap.timeline();
+    timeline
+      .to(this.blob, { shapeScale: 0.02, duration: 0.22, ease: 'power2.in' })
+      .call(swap)
+      .to(this.blob, { shapeScale: 1, duration: 0.8, ease: 'back.out(1.5)' });
+    if (id === 'lowpoly') timeline.to(this.blob, { morph: 0, duration: 2.4, ease: 'power2.inOut' }, '<0.25');
+    this.shapeTimeline = timeline;
+  }
+
   private setBackground(index: number): void {
     document.documentElement.style.setProperty('--bg', materials[index].background);
+    this.effects.dust.setTintFrom(materials[index].background);
   }
 
   private resize = (): void => {
     const { clientWidth: w, clientHeight: h } = this.container;
     this.renderer.setSize(w, h);
+    this.effects.resize(w, h);
     const aspect = w / h;
     this.camera.aspect = aspect;
 
