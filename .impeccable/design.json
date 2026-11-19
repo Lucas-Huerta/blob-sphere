@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-19T00:00:00Z",
+  "title": "Design System: Blob Sphere",
+  "extensions": {
+    "colorMeta": {
+      "stage-night": { "role": "neutral", "displayName": "Stage Night", "canonical": "#0b0b10", "tonalRamp": ["#040407", "#0b0b10", "#16161f", "#262633", "#3a3a4b", "#5a5a70", "#8b8ba0", "#c4c4d2"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#f2f2f7", "tonalRamp": ["#3a3a3d", "#58585d", "#78787f", "#98989f", "#b4b4ba", "#cfcfd5", "#e4e4ea", "#f2f2f7"] },
+      "signal-ice": { "role": "primary", "displayName": "Ice Signal", "canonical": "#9fd4ff", "tonalRamp": ["#0b2a43", "#134469", "#1f618f", "#3a82b8", "#5fa3dc", "#9fd4ff", "#c4e5ff", "#e6f4ff"] },
+      "signal-live": { "role": "secondary", "displayName": "Live Green", "canonical": "#8ff0bf", "tonalRamp": ["#0b3322", "#14573a", "#1f7c53", "#34a273", "#5ec797", "#8ff0bf", "#bff7da", "#e6fbf0"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Material title", "purpose": "Material name under the blob." },
+      "body": { "displayName": "Description", "purpose": "One-line material description." },
+      "label": { "displayName": "Label", "purpose": "Category chip and panel titles." },
+      "brand": { "displayName": "Brand", "purpose": "Top-center product name." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "stage-fade", "value": "background 0.8s ease", "purpose": "Page background following the material." },
+      { "name": "hud-swap", "value": "0.6s cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Title, description and chip rising in when the material changes." },
+      { "name": "chill-fade", "value": "opacity 0.9s ease", "purpose": "UI fading out in Chill mode." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "600px / 640px" },
+      { "name": "short-landscape", "value": "max-height 480px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Pill Button",
+      "kind": "button",
+      "refersTo": "pill-button",
+      "description": "Mix, Chill and camera controls: frosted glass capsule.",
+      "html": "<button class=\"ds-pill\">Mix</button>",
+      "css": ".ds-pill { padding: 0.55rem 1rem; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.18); background: rgb(14 14 20 / 0.6); backdrop-filter: blur(14px); color: #f2f2f7; font: 500 0.8rem ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; cursor: pointer; } .ds-pill:hover { background: rgb(255 255 255 / 0.16); } .ds-pill:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }"
+    },
+    {
+      "name": "Arrow Button",
+      "kind": "button",
+      "refersTo": "arrow-button",
+      "description": "Carousel previous/next circle.",
+      "html": "<button class=\"ds-arrow\" aria-label=\"Previous\">&lsaquo;</button>",
+      "css": ".ds-arrow { width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.2); background: rgb(255 255 255 / 0.06); color: #f2f2f7; font-size: 1.6rem; line-height: 1; cursor: pointer; backdrop-filter: blur(8px); transition: background 0.2s; } .ds-arrow:hover { background: rgb(255 255 255 / 0.16); } .ds-arrow:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }"
+    },
+    {
+      "name": "Pagination Dots",
+      "kind": "nav",
+      "description": "Carousel position; the active dot stretches.",
+      "html": "<div class=\"ds-dots\"><span class=\"ds-dot\"></span><span class=\"ds-dot active\"></span><span class=\"ds-dot\"></span></div>",
+      "css": ".ds-dots { display: flex; gap: 0.6rem; } .ds-dot { width: 0.55rem; height: 0.55rem; border-radius: 999px; background: rgb(255 255 255 / 0.3); transition: width 0.3s, background 0.3s; } .ds-dot.active { width: 1.6rem; background: #fff; }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "description": "Material family tag with a colored dot.",
+      "html": "<span class=\"ds-chip\">Organic</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.2rem 0.65rem; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.2); background: rgb(255 255 255 / 0.06); color: #f2f2f7; font: 500 0.7rem ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; } .ds-chip::before { content: ''; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #ff9bb0; }"
+    },
+    {
+      "name": "Glass Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Mix popover with selectable list item.",
+      "html": "<div class=\"ds-panel\"><p class=\"ds-panel-title\">Mix with</p><button class=\"ds-item active\">Chrome</button><button class=\"ds-item\">Glass</button></div>",
+      "css": ".ds-panel { width: 15rem; padding: 0.9rem; border-radius: 12px; border: 1px solid rgb(255 255 255 / 0.1); background: rgb(14 14 20 / 0.78); backdrop-filter: blur(14px); color: #f2f2f7; font-family: ui-sans-serif, system-ui, sans-serif; display: flex; flex-direction: column; gap: 0.2rem; } .ds-panel-title { margin: 0 0 0.6rem; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; } .ds-item { text-align: left; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid transparent; background: transparent; color: inherit; font-size: 0.82rem; cursor: pointer; } .ds-item:hover { background: rgb(255 255 255 / 0.1); } .ds-item.active { border-color: #9fd4ff; background: rgb(159 212 255 / 0.14); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Glass Instrument Panel",
+    "overview": "The page is a dark stage with one lit subject, the blob. Everything else is instrument glass floating over it: translucent, blurred, hairline-edged controls you can read through. The stage color follows the active material. Confirmed direction for controls: tactile and confident, with soft material-tinted glows as the depth language (not yet built).",
+    "keyCharacteristics": [
+      "Dark, per-material tinted stage; the canvas is transparent.",
+      "Translucent glass surfaces with backdrop blur and a 1px white hairline.",
+      "One cool accent (ice blue) for interaction.",
+      "System sans only; hierarchy from size, weight and tracking.",
+      "Chill mode removes everything except the blob and the breathing guide."
+    ],
+    "rules": [
+      { "name": "The Stage Follows The Material Rule", "body": "The page background is always the current material's background; UI surfaces are translucent so they inherit it.", "section": "colors" },
+      { "name": "The One Signal Rule", "body": "Ice blue is the only interactive accent.", "section": "colors" },
+      { "name": "The Tracking Is The Voice Rule", "body": "Wide letter-spacing on small caps labels and the brand; tight spacing on the large title. No display typeface.", "section": "typography" },
+      { "name": "The Glass, Not Card Rule", "body": "Surfaces are translucent with blur and a hairline. Never opaque cards, never hard drop shadows.", "section": "elevation" },
+      { "name": "The Glow Is Tinted Rule", "body": "Any glow takes its hue from the current material.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do let the page background follow the active material's background, and keep UI surfaces translucent so they inherit it.",
+      "Do use ice blue (#9fd4ff) as the single interaction accent.",
+      "Do build glass surfaces with blur (8 to 14px), a 1px white hairline at 0.1 to 0.2 alpha, and ink (#f2f2f7) text.",
+      "Do keep full pills for buttons and 12px for panels; give every control a 2px white focus-visible outline.",
+      "Do keep the UI quiet enough that the blob stays the brightest thing on screen, and fade everything in Chill mode.",
+      "Do respect prefers-reduced-motion and safe-area insets on every new element."
+    ],
+    "donts": [
+      "Don't put a solid opaque card or a hard drop shadow behind controls.",
+      "Don't add a second accent color or a decorative typeface.",
+      "Don't use pure white text on large areas; keep ink at #f2f2f7 with opacity for secondary text.",
+      "Don't hard-code a page background; it comes from the material.",
+      "Don't let any control grow large enough to compete with the blob."
+    ]
+  }
+}

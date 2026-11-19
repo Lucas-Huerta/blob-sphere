@@ -26,5 +26,7 @@ export interface MaterialDef {
   shape?: ShapeId;
   /** Page background tint while this material is shown. */
   background: string;
+  /** Optional UI glow colour; derived from `background` when omitted. */
+  accent?: string;
   create(ctx: MaterialContext): THREE.ShaderMaterial;
 }
