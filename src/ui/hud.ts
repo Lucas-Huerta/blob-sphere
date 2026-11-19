@@ -3,7 +3,7 @@ import type { Carousel } from '@/carousel/Carousel';
 import type { MaterialDef } from '@/materials/types';
 
 export class Hud {
-  private title = el('h1', 'hud-title');
+  private title = el('h2', 'hud-title');
   private desc = el('p', 'hud-desc');
   private counter = el('span', 'hud-counter');
   private dots: HTMLButtonElement[] = [];
@@ -17,6 +17,9 @@ export class Hud {
     root.setAttribute('role', 'region');
     root.setAttribute('aria-roledescription', 'carousel');
     root.setAttribute('aria-label', 'Materials');
+
+    const brand = el('h1', 'hud-brand');
+    brand.textContent = 'Morph';
 
     const prev = arrow('prev', 'Previous material', '‹', () => carousel.prev());
     const next = arrow('next', 'Next material', '›', () => carousel.next());
@@ -35,7 +38,7 @@ export class Hud {
       return b;
     });
 
-    root.append(prev, next, info, nav);
+    root.append(brand, prev, next, info, nav);
     container.append(root);
     this.render(carousel.index);
     carousel.onChange((i) => this.render(i));
