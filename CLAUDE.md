@@ -44,7 +44,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 12. ✅ **Ferrofluide** — noir brillant avec pointes (normal/displacement spikes) piloté par bruit. *(fait : `materials/ferrofluid/`, cônes de Worley déplacés dans le vertex shader, normales suivant les pointes via le hook `BLOB_SURFACE` du chunk)*
 13. ✅ **Velours / tissu (sheen)** — rim light diffus, retroréflexion. *(fait : `materials/velvet/`, lobe de sheen type Charlie + rim + rétroréflexion, poil brossé par bruit, marque au clic)*
 14. ✅ **Aurore / dégradé fresnel** — gradients fluides colorés, glow en bordure. *(fait : `materials/aurora/`, 3 couches de rideaux (bruit étiré en Y, déformé), dégradé vert→cyan→violet par hauteur, corona fresnel qui cycle)*
-15. **Wireframe / grille holo (tron)** — grille, scan, transparence.
+15. ✅ **Wireframe / grille holo (tron)** — grille, scan, transparence. *(fait : `materials/wireframe/`, grille lat/long anti-aliasée par `fwidth`, noeuds, bande de scan, double face additive)*
 16. **Cristal à facettes** — normales plates (flat shading), gemme.
 17. **Tache d'huile (oil slick)** — iridescence sombre et marbrée.
 18. **Fourrure (shell texturing)** — plusieurs coques, très gourmand.
