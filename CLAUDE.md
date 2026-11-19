@@ -166,11 +166,15 @@ blob-sphere/
     │       ├── smoothing.ts         # filtre (One Euro / lerp) anti-jitter
     │       └── HandOverlay.ts       # rendu 2D des mains pour le feedback
     ├── ui/
-    │   └── hud.ts             # nom du matériau, pagination, bouton « activer la caméra »
+    │   ├── hud.ts             # nom du matériau, pagination, bouton « activer la caméra »
+    │   ├── settings.ts        # panneau lil-gui : vitesse + sliders/couleurs générés depuis les uniforms
+    │   ├── mix.ts             # bouton « Mix » : choix du matériau partenaire dans la liste + slider de mélange
+    │   └── uniformControls.ts # uniforms → contrôles (plages connues par nom, sinon dérivées de la valeur par défaut)
     └── utils/                 # maths, easing, helpers DOM
 ```
 
 ### Principes d'architecture
+- **Panneau de réglages et mélange** (le mélange a son propre bouton `MixPanel`, hors settings) : le panneau est généré depuis les uniforms nommés de chaque matériau (tout `float` et `THREE.Color`, hors uniforms moteur). Un nouveau matériau a donc ses sliders sans rien toucher ; pour une plage spécifique, l'ajouter à `RANGES` dans `uniformControls.ts`. Le mélange rend deux meshes (primaire + partenaire en enfant) : chaque matériau est patché (`blend.ts`) pour jeter les fragments selon un masque de bruit par sommet (dissolve), et la forme est morphée via `uShapeBlend`/`uOther*` dans `blobDisplace.glsl`. Tout vertex shader de matériau doit inclure ce chunk et avoir un `void main() {` littéral.
 - **Un matériau = un dossier autonome** (fabrique + GLSL). Ajouter un matériau = créer le dossier et exporter un `MaterialDef` avec son `order` (position dans le carrousel) ; le registre le découvre automatiquement, **aucun fichier partagé à modifier** (donc pas de conflit entre PRs de matériaux). Ordres utilisés : 10 chrome, 20 verre, 30 iridescent, 900+ placeholders ; en prendre un libre dans l'intervalle voulu.
 - **Le carrousel ne connaît que le registre** de matériaux (id, nom, description) ; il émet un événement `change(index)`, `App` demande au `Blob` d'appliquer le matériau.
 - **Les inputs sont découplés** : souris, clavier et (V2) mains produisent tous les mêmes **intentions** (`next`, `prev`, `poke(point)`, `grab(point)`, `stretch(factor)`, `rotate(dx, dy)`). `App` les route vers `Carousel`/`Blob`. Cela permet d'ajouter le hand tracking sans modifier le reste.

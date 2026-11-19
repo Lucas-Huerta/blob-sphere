@@ -1,0 +1,33 @@
+/* Live settings panel: glass look, docked top-left (the camera button owns the top-right). */
+.lil-gui.lil-root {
+  --background-color: rgb(14 14 20 / 0.72);
+  --widget-color: rgb(255 255 255 / 0.12);
+  --hover-color: rgb(255 255 255 / 0.2);
+  --focus-color: rgb(255 255 255 / 0.26);
+  --number-color: #9fd4ff;
+  --string-color: #9fd4ff;
+  --title-background-color: rgb(255 255 255 / 0.06);
+  --font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-size: 11px;
+  --width: 260px;
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 3.2vh);
+  left: calc(env(safe-area-inset-left) + 1.5rem);
+  right: auto;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 10px;
+  overflow: hidden auto;
+  max-height: 70vh;
+  touch-action: manipulation;
+}
+
+@media (max-width: 640px) {
+  .lil-gui.lil-root {
+    --width: 220px;
+    top: calc(env(safe-area-inset-top) + 0.7rem);
+    left: calc(env(safe-area-inset-left) + 0.8rem);
+  }
+}
