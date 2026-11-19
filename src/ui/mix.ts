@@ -66,6 +66,15 @@ export class MixPanel {
     this.panel.append(title, list, row);
     container.append(this.button, this.panel);
 
+    // Escape closes the popover and hands focus back to its trigger.
+    this.panel.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !this.panel.hidden) {
+        e.stopPropagation();
+        this.toggle();
+        this.button.focus();
+      }
+    });
+
     carousel.onChange(() => this.follow());
     this.follow();
     this.renderAmount();

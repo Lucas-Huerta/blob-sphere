@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import { createEnvironment } from '@/core/environment';
 import { Effects } from '@/core/effects';
+import { glowColor } from '@/core/glow';
 import { ChillMode } from '@/chill/ChillMode';
 import { resolveShape, type ShapeChoice } from '@/blob/shapes';
 import { Blob } from '@/blob/Blob';
@@ -12,6 +13,7 @@ import { bindSwipe } from '@/input/swipe';
 import { materials } from '@/materials';
 import { HandController } from '@/input/hands/HandController';
 import { HandTracker } from '@/input/hands/HandTracker';
+import { initGlow } from '@/ui/glow';
 import { Hud } from '@/ui/hud';
 import { HandControlUi } from '@/ui/handControl';
 import { SettingsPanel } from '@/ui/settings';
@@ -45,6 +47,7 @@ export class App {
   private shapeTimeline?: gsap.core.Timeline;
 
   constructor(private container: HTMLElement) {
+    initGlow();
     // Phones have dense screens and weak GPUs: cap the pixel ratio lower than on desktop.
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.coarsePointer ? 1.5 : 2));
     this.blob = new Blob(materials[0], { envMap: createEnvironment(this.renderer) });
@@ -191,6 +194,7 @@ export class App {
 
   private setBackground(index: number): void {
     document.documentElement.style.setProperty('--bg', materials[index].background);
+    document.documentElement.style.setProperty('--glow', glowColor(materials[index].background, materials[index].accent));
     this.effects.dust.setTintFrom(materials[index].background);
   }
 

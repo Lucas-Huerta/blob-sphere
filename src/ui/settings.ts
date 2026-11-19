@@ -1,3 +1,4 @@
+import { isGlowEnabled, setGlowEnabled } from './glow';
 import GUI, { type Controller } from 'lil-gui';
 import * as THREE from 'three';
 import './settings.css';
@@ -46,6 +47,7 @@ export class SettingsPanel {
     fx.add(settings, 'grain', 0, 0.2, 0.005).name('Grain');
     fx.add(settings, 'aberration', 0, 0.03, 0.0005).name('Chromatic aberration');
     fx.add(settings, 'dust', 0, 1, 0.01).name('Dust');
+    fx.add({ glow: isGlowEnabled() }, 'glow').name('UI glow').onChange((v: boolean) => setGlowEnabled(v));
     fx.close();
 
     this.gui.add({ reset: () => this.reset() }, 'reset').name('Reset');

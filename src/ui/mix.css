@@ -1,27 +1,10 @@
-/* Mix button sits under the camera button (top-right); its popover opens below it. */
-.mix-button {
-  position: fixed;
-  top: calc(env(safe-area-inset-top) + 3.2vh + 3.4rem);
-  right: calc(env(safe-area-inset-right) + 1.5rem);
-  z-index: 20;
-  padding: 0.55rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 0.18);
-  background: rgb(14 14 20 / 0.6);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: #f2f2f7;
-  font: 500 0.8rem ui-sans-serif, system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-}
-.mix-button:hover, .mix-button.open { background: rgb(255 255 255 / 0.16); }
+/* The Mix button itself shares the pill style defined in hud.css; its popover opens below it. */
 .mix-button.mixing::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 0.5rem; border-radius: 50%; background: #9fd4ff; vertical-align: middle; }
 
 .mix-panel {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 3.2vh + 3.4rem + 2.8rem);
-  right: calc(env(safe-area-inset-right) + 1.5rem);
+  top: calc(var(--stack-top) + var(--stack-step) + var(--pill-h) + 0.4rem);
+  right: var(--stack-right);
   z-index: 20;
   width: 15rem;
   max-height: 60vh;
@@ -34,12 +17,17 @@
   -webkit-backdrop-filter: blur(14px);
   color: #f2f2f7;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  box-shadow: var(--glow-strong);
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
 }
 .mix-panel[hidden] { display: none; }
 .mix-title { margin: 0 0 0.6rem; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; }
 .mix-list { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.8rem; }
-.mix-item { text-align: left; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid transparent; background: transparent; color: inherit; font-size: 0.82rem; cursor: pointer; }
+.mix-item { text-align: left; min-height: 2rem; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid transparent; background: transparent; color: inherit; font-size: 0.82rem; cursor: pointer; }
+.mix-item { transition: background 0.15s, border-color 0.15s; }
 .mix-item:hover:not(:disabled) { background: rgb(255 255 255 / 0.1); }
+.mix-item:focus-visible, .mix-slider:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .mix-item.active { border-color: #9fd4ff; background: rgb(159 212 255 / 0.14); }
 .mix-item:disabled { opacity: 0.3; cursor: default; }
 .mix-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; }
@@ -47,6 +35,8 @@
 .mix-readout { width: 2.4rem; text-align: right; font-variant-numeric: tabular-nums; opacity: 0.8; }
 
 @media (max-width: 640px) {
-  .mix-button { top: calc(env(safe-area-inset-top) + 0.7rem + 3rem); right: calc(env(safe-area-inset-right) + 0.8rem); }
-  .mix-panel { top: calc(env(safe-area-inset-top) + 0.7rem + 3rem + 2.8rem); right: calc(env(safe-area-inset-right) + 0.8rem); width: 13rem; }
+  .mix-panel { width: 13rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mix-item { transition: none; }
 }
