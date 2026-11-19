@@ -29,7 +29,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 1. ✅ **Chrome liquide / mercure** — réflexion environnement (cubemap/HDRI), fresnel fort, quasi miroir. *(fait : `materials/chrome/`)*
 2. ✅ **Verre / cristal avec dispersion** — réfraction, aberration chromatique, fresnel, légère teinte. *(fait : `materials/glass/`, double réfraction approximée sur une sphère)*
 3. ✅ **Iridescent / bulle de savon** — interférence en couche mince (thin-film), couleurs changeant avec l'angle. *(fait : `materials/iridescent/`, épaisseur de film par bruit déformé + gravité, rendu transparent)*
-4. **Lave / magma** — bruit fbm animé, émissif chaud, croûte sombre, fissures lumineuses.
+4. ✅ **Lave / magma** — bruit fbm animé, émissif chaud, croûte sombre, fissures lumineuses. *(fait : `materials/lava/`, ridged fbm domain-warped, chaleur localisée au clic)*
 5. **Gelée / subsurface scattering** — translucidité simulée, SSS approximé (wrap lighting + épaisseur), brillance.
 
 **Priorité 2**
