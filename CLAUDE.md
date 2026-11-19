@@ -38,7 +38,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 8. ✅ **Plasma / énergie** — bruit multi-octaves animé, glow additif, éclairs. *(fait : `materials/plasma/`, fbm déformé + arcs par passage à zéro du bruit, clignotement, tonemap doux, blending additif)*
 9. ✅ **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse. *(fait : `materials/pearl/`, bandes de nacre par bruit étiré faisant varier l'épaisseur du film, partage `chunks/thinFilm.glsl` avec l'iridescent)*
 10. ✅ **Or / métal brossé (PBR)** — BRDF métallique, anisotropie optionnelle. *(fait : `materials/gold/`, F0 coloré, flou par mip de la cubemap selon la rugosité, brossage en anneaux + 3 taps anisotropes, poli au clic)*
-11. **Glace / verre dépoli** — réfraction floutée, givre, bruit de surface.
+11. ✅ **Glace / verre dépoli** — réfraction floutée, givre, bruit de surface. *(fait : `materials/ice/`, givre par plaques qui floute la réfraction via les mips de la cubemap, fissures intérieures en parallaxe, fonte au clic ; `chunks/refraction.glsl` partagé avec le verre)*
 
 **Priorité 3 (bonus, plus coûteux)**
 12. **Ferrofluide** — noir brillant avec pointes (normal/displacement spikes) piloté par bruit.
@@ -153,7 +153,7 @@ blob-sphere/
     │   ├── glass/ …
     │   └── …
     ├── shaders/
-    │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl (+ à venir : fresnel, tonemap)
+    │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl, refraction.glsl (+ à venir : fresnel, tonemap)
     ├── carousel/
     │   ├── Carousel.ts        # état (index courant), navigation, événements
     │   └── carousel.css
