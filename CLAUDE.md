@@ -33,7 +33,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 5. **Gelée / subsurface scattering** — translucidité simulée, SSS approximé (wrap lighting + épaisseur), brillance.
 
 **Priorité 2**
-6. **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain.
+6. ✅ **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain. *(fait : `materials/holographic/`, palette cosinus selon l'angle, scanlines, bande glitch, grain, blending additif)*
 7. **Toon / cel-shading** — bandes de lumière quantifiées, contour (rim/outline).
 8. **Plasma / énergie** — bruit multi-octaves animé, glow additif, éclairs.
 9. **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse.
