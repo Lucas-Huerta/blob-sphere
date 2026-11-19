@@ -5,6 +5,7 @@ import fragmentShader from './toon.frag.glsl';
 
 export const toon: MaterialDef = {
   id: 'toon',
+  order: 70,
   name: 'Toon Cel',
   description: 'Flat cartoon tones, halftone shadows, hard highlight and an ink outline.',
   background: '#141c33',

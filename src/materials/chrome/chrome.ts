@@ -5,6 +5,7 @@ import fragmentShader from './chrome.frag.glsl';
 
 export const chrome: MaterialDef = {
   id: 'chrome',
+  order: 10,
   name: 'Liquid Chrome',
   description: 'Mercury-like mirror reflecting a studio environment.',
   background: '#090a0e',
