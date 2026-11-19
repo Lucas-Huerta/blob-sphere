@@ -29,11 +29,11 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 1. ✅ **Chrome liquide / mercure** — réflexion environnement (cubemap/HDRI), fresnel fort, quasi miroir. *(fait : `materials/chrome/`)*
 2. ✅ **Verre / cristal avec dispersion** — réfraction, aberration chromatique, fresnel, légère teinte. *(fait : `materials/glass/`, double réfraction approximée sur une sphère)*
 3. ✅ **Iridescent / bulle de savon** — interférence en couche mince (thin-film), couleurs changeant avec l'angle. *(fait : `materials/iridescent/`, épaisseur de film par bruit déformé + gravité, rendu transparent)*
-4. **Lave / magma** — bruit fbm animé, émissif chaud, croûte sombre, fissures lumineuses.
+4. ✅ **Lave / magma** — bruit fbm animé, émissif chaud, croûte sombre, fissures lumineuses. *(fait : `materials/lava/`, ridged fbm domain-warped, chaleur localisée au clic)*
 5. ✅ **Gelée / subsurface scattering** — translucidité simulée, SSS approximé (wrap lighting + épaisseur), brillance. *(fait : `materials/jelly/`, absorption type Beer-Lambert + wrap lighting + transmission, spéculaire humide)*
 
 **Priorité 2**
-6. **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain.
+6. ✅ **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain. *(fait : `materials/holographic/`, palette cosinus selon l'angle, scanlines, bande glitch, grain, blending additif)*
 7. **Toon / cel-shading** — bandes de lumière quantifiées, contour (rim/outline).
 8. **Plasma / énergie** — bruit multi-octaves animé, glow additif, éclairs.
 9. **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse.
