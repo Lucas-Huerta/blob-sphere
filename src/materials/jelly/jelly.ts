@@ -5,6 +5,7 @@ import fragmentShader from './jelly.frag.glsl';
 
 export const jelly: MaterialDef = {
   id: 'jelly',
+  order: 50,
   name: 'Wobbly Jelly',
   description: 'Translucent gelatin: light bleeds through thin parts, deep colour in the core.',
   background: '#14060c',
