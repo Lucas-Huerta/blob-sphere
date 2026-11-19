@@ -5,6 +5,7 @@ import fragmentShader from './lava.frag.glsl';
 
 export const lava: MaterialDef = {
   id: 'lava',
+  order: 40,
   name: 'Molten Lava',
   description: 'Dark crust split by glowing, drifting cracks of magma.',
   background: '#110605',
