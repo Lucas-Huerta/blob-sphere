@@ -45,7 +45,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 13. ✅ **Velours / tissu (sheen)** — rim light diffus, retroréflexion. *(fait : `materials/velvet/`, lobe de sheen type Charlie + rim + rétroréflexion, poil brossé par bruit, marque au clic)*
 14. ✅ **Aurore / dégradé fresnel** — gradients fluides colorés, glow en bordure. *(fait : `materials/aurora/`, 3 couches de rideaux (bruit étiré en Y, déformé), dégradé vert→cyan→violet par hauteur, corona fresnel qui cycle)*
 15. ✅ **Wireframe / grille holo (tron)** — grille, scan, transparence. *(fait : `materials/wireframe/`, grille lat/long anti-aliasée par `fwidth`, noeuds, bande de scan, double face additive)*
-16. **Cristal à facettes** — normales plates (flat shading), gemme.
+16. ✅ **Cristal à facettes** — normales plates (flat shading), gemme. *(fait : `materials/crystal/`, facettes = cellules de Worley de la normale (normales plates collées au blob), réfraction dispersive par facette, arêtes via F2−F1 ; `chunks/worley.glsl` partagé avec le ferrofluide)*
 17. **Tache d'huile (oil slick)** — iridescence sombre et marbrée.
 18. **Fourrure (shell texturing)** — plusieurs coques, très gourmand.
 
@@ -153,7 +153,7 @@ blob-sphere/
     │   ├── glass/ …
     │   └── …
     ├── shaders/
-    │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl, refraction.glsl (+ à venir : fresnel, tonemap)
+    │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl, refraction.glsl, worley.glsl (+ à venir : fresnel, tonemap)
     ├── carousel/
     │   ├── Carousel.ts        # état (index courant), navigation, événements
     │   └── carousel.css
