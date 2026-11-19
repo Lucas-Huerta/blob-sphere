@@ -5,6 +5,7 @@ import fragmentShader from './glass.frag.glsl';
 
 export const glass: MaterialDef = {
   id: 'glass',
+  order: 20,
   name: 'Dispersive Glass',
   description: 'Refractive crystal splitting light into colour fringes.',
   background: '#080e16',
