@@ -5,7 +5,7 @@ export type UniformControl =
   | { kind: 'color'; name: string; label: string };
 
 /** Uniforms driven by the engine (time, impacts, blend plumbing), never exposed as sliders. */
-const INTERNAL = /^u(Time|EnvMap|Impacts|ImpactStrength|Grab|GrabDrag|Blend|BlendSide|ShapeBlend|Other.*)$/;
+const INTERNAL = /^u(Time|EnvMap|Impacts|ImpactStrength|Grab|GrabDrag|Blend|BlendSide|Shape(Blend|Mode|Morph|Amp)|Other.*)$/;
 
 /** Sensible slider ranges for well-known uniforms; anything else gets a range derived from its default. */
 const RANGES: Record<string, [min: number, max: number, step: number]> = {
