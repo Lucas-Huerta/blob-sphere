@@ -1,11 +1,12 @@
 import './hud.css';
 import type { Carousel } from '@/carousel/Carousel';
-import type { MaterialDef } from '@/materials/types';
+import { CATEGORY_LABELS, type MaterialDef } from '@/materials/types';
 
 export class Hud {
   private title = el('h2', 'hud-title');
   private desc = el('p', 'hud-desc');
   private counter = el('span', 'hud-counter');
+  private category = el('span', 'hud-category');
   private dots: HTMLButtonElement[] = [];
 
   constructor(
@@ -26,7 +27,9 @@ export class Hud {
 
     const info = el('div', 'hud-info');
     info.setAttribute('aria-live', 'polite');
-    info.append(this.counter, this.title, this.desc);
+    const meta = el('div', 'hud-meta');
+    meta.append(this.counter, this.category);
+    info.append(meta, this.title, this.desc);
 
     const nav = el('div', 'hud-dots');
     this.dots = defs.map((d, i) => {
@@ -49,6 +52,8 @@ export class Hud {
     this.title.textContent = def.name;
     this.desc.textContent = def.description;
     this.counter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(this.defs.length).padStart(2, '0')}`;
+    this.category.textContent = CATEGORY_LABELS[def.category];
+    this.category.dataset.category = def.category;
     this.dots.forEach((d, i) => {
       d.classList.toggle('active', i === index);
       d.setAttribute('aria-current', String(i === index));

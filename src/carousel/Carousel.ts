@@ -3,6 +3,7 @@ type Listener = (index: number) => void;
 /** Pure carousel state (wrapping index + change events). No DOM, easy to test. */
 export class Carousel {
   private _index = 0;
+  private _direction: 1 | -1 = 1;
   private listeners = new Set<Listener>();
 
   constructor(readonly count: number) {
@@ -11,6 +12,11 @@ export class Carousel {
 
   get index(): number {
     return this._index;
+  }
+
+  /** Direction of the last change along the shortest path (+1 = forward). */
+  get direction(): 1 | -1 {
+    return this._direction;
   }
 
   next(): void {
@@ -24,6 +30,10 @@ export class Carousel {
   goTo(index: number): void {
     const wrapped = ((index % this.count) + this.count) % this.count;
     if (wrapped === this._index) return;
+    let delta = wrapped - this._index;
+    if (delta > this.count / 2) delta -= this.count;
+    else if (delta < -this.count / 2) delta += this.count;
+    this._direction = delta >= 0 ? 1 : -1;
     this._index = wrapped;
     this.listeners.forEach((fn) => fn(wrapped));
   }

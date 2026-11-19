@@ -7,6 +7,7 @@ export const toon: MaterialDef = {
   id: 'toon',
   order: 70,
   name: 'Toon Cel',
+  category: 'light',
   description: 'Flat cartoon tones, halftone shadows, hard highlight and an ink outline.',
   background: '#141c33',
   create: () =>

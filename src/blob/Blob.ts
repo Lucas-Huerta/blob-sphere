@@ -36,6 +36,9 @@ export class Blob {
   /** Scales down motion for prefers-reduced-motion. */
   motionScale = 1;
 
+  /** Extra yaw (radians) driven by the carousel transition. */
+  spin = 0;
+
   constructor(def: MaterialDef, private ctx: MaterialContext) {
     this.mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 64), def.create(this.ctx));
     this.attachShared(this.material);
@@ -140,7 +143,7 @@ export class Blob {
 
     this.material.uniforms.uTime.value = time;
     // The blob leans towards where it is carried, as if turning to follow the hand.
-    this.mesh.rotation.y = time * 0.1 + pos.x * 0.35;
+    this.mesh.rotation.y = time * 0.1 + pos.x * 0.35 + this.spin;
     this.mesh.rotation.x = -pos.y * 0.35;
   }
 

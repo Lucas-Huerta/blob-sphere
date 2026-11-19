@@ -28,3 +28,17 @@ describe('Carousel', () => {
     expect(fn).not.toHaveBeenCalled();
   });
 });
+
+describe('Carousel direction', () => {
+  it('reports the shortest direction, including across the wrap', () => {
+    const c = new Carousel(4);
+    c.next();
+    expect(c.direction).toBe(1);
+    c.prev();
+    expect(c.direction).toBe(-1);
+    c.prev(); // 0 -> 3 wraps backwards
+    expect(c.direction).toBe(-1);
+    c.next(); // 3 -> 0 wraps forwards
+    expect(c.direction).toBe(1);
+  });
+});

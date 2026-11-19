@@ -7,6 +7,7 @@ export const holographic: MaterialDef = {
   id: 'holographic',
   order: 60,
   name: 'Holographic Foil',
+  category: 'light',
   description: 'Rainbow foil that shifts with the angle, with scanlines and a sweeping glitch band.',
   background: '#050a12',
   create: ({ envMap }) =>

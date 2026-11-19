@@ -7,6 +7,7 @@ export const chrome: MaterialDef = {
   id: 'chrome',
   order: 10,
   name: 'Liquid Chrome',
+  category: 'mineral',
   description: 'Mercury-like mirror reflecting a studio environment.',
   background: '#090a0e',
   create: ({ envMap }) =>

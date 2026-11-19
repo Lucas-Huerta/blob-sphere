@@ -6,6 +6,7 @@ const def = (id: string, order?: number): MaterialDef => ({
   id,
   name: id,
   description: '',
+  category: 'light',
   background: '#000',
   order,
   create: () => {

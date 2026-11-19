@@ -7,6 +7,7 @@ export const jelly: MaterialDef = {
   id: 'jelly',
   order: 50,
   name: 'Wobbly Jelly',
+  category: 'organic',
   description: 'Translucent gelatin: light bleeds through thin parts, deep colour in the core.',
   background: '#14060c',
   create: ({ envMap }) =>

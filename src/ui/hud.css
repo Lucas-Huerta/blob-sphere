@@ -39,7 +39,24 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
-.hud-counter { display: block; font-size: 0.75rem; letter-spacing: 0.2em; opacity: 0.55; }
+.hud-meta { display: flex; justify-content: center; align-items: center; gap: 0.8rem; }
+.hud-counter { font-size: 0.75rem; letter-spacing: 0.2em; opacity: 0.55; }
+.hud-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.06);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.hud-category::before { content: ''; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--cat, #fff); }
+.hud-category[data-category='organic'] { --cat: #ff9bb0; }
+.hud-category[data-category='mineral'] { --cat: #9fd0ff; }
+.hud-category[data-category='light'] { --cat: #ffd36b; }
 .hud-title { margin: 0.4rem 0 0.3rem; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 600; letter-spacing: -0.01em; }
 .hud-desc { margin: 0; font-size: 0.95rem; line-height: 1.5; opacity: 0.7; }
 
