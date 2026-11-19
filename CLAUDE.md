@@ -34,7 +34,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 
 **Priorité 2**
 6. ✅ **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain. *(fait : `materials/holographic/`, palette cosinus selon l'angle, scanlines, bande glitch, grain, blending additif)*
-7. **Toon / cel-shading** — bandes de lumière quantifiées, contour (rim/outline).
+7. ✅ **Toon / cel-shading** — bandes de lumière quantifiées, contour (rim/outline). *(fait : `materials/toon/`, 3 tons anti-aliasés via `fwidth`, trame de points dans l'ombre, contour d'encre)*
 8. **Plasma / énergie** — bruit multi-octaves animé, glow additif, éclairs.
 9. **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse.
 10. **Or / métal brossé (PBR)** — BRDF métallique, anisotropie optionnelle.
