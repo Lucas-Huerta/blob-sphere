@@ -30,7 +30,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 2. ✅ **Verre / cristal avec dispersion** — réfraction, aberration chromatique, fresnel, légère teinte. *(fait : `materials/glass/`, double réfraction approximée sur une sphère)*
 3. ✅ **Iridescent / bulle de savon** — interférence en couche mince (thin-film), couleurs changeant avec l'angle. *(fait : `materials/iridescent/`, épaisseur de film par bruit déformé + gravité, rendu transparent)*
 4. **Lave / magma** — bruit fbm animé, émissif chaud, croûte sombre, fissures lumineuses.
-5. **Gelée / subsurface scattering** — translucidité simulée, SSS approximé (wrap lighting + épaisseur), brillance.
+5. ✅ **Gelée / subsurface scattering** — translucidité simulée, SSS approximé (wrap lighting + épaisseur), brillance. *(fait : `materials/jelly/`, absorption type Beer-Lambert + wrap lighting + transmission, spéculaire humide)*
 
 **Priorité 2**
 6. **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain.
