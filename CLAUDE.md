@@ -51,7 +51,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 14. ✅ **Aurore / dégradé fresnel** — gradients fluides colorés, glow en bordure. *(fait : `materials/aurora/`, 3 couches de rideaux (bruit étiré en Y, déformé), dégradé vert→cyan→violet par hauteur, corona fresnel qui cycle)*
 15. ✅ **Wireframe / grille holo (tron)** — grille, scan, transparence. *(fait : `materials/wireframe/`, grille lat/long anti-aliasée par `fwidth`, noeuds, bande de scan, double face additive)*
 16. ✅ **Cristal à facettes** — normales plates (flat shading), gemme. *(fait : `materials/crystal/`, facettes = cellules de Worley de la normale (normales plates collées au blob), réfraction dispersive par facette, arêtes via F2−F1 ; `chunks/worley.glsl` partagé avec le ferrofluide)*
-17. **Tache d'huile (oil slick)** — iridescence sombre et marbrée.
+17. ✅ **Tache d'huile (oil slick)** — iridescence sombre et marbrée. *(fait : `materials/oil/`, film mince (`chunks/thinFilm.glsl`) dont l'épaisseur suit un bruit tourbillonnant déformé, sur un corps quasi noir + reflet d'environnement, éclat de couleur au clic)*
 18. **Fourrure (shell texturing)** — plusieurs coques, très gourmand.
 
 ### Idées supplémentaires (backlog, non priorisées)
