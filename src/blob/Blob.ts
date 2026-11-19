@@ -28,6 +28,11 @@ export class Blob {
   private velocity = new THREE.Vector3();
   private raycaster = new THREE.Raycaster();
 
+  /** Where the body rests (the recoil spring pulls towards it); moved by an open hand. */
+  private anchor = new THREE.Vector3();
+  /** Max distance (world units) the blob can be carried from the centre. */
+  private static readonly REACH = new THREE.Vector2(1.9, 1.1);
+
   /** Scales down motion for prefers-reduced-motion. */
   motionScale = 1;
 
@@ -95,6 +100,17 @@ export class Blob {
     this.grabHeld = false;
   }
 
+  /** Carry the whole blob towards `ndc` (open hand); `null` lets it return to the centre. */
+  carryTo(ndc: THREE.Vector2 | null): void {
+    if (!ndc) return void this.anchor.set(0, 0, 0);
+    const reach = Blob.REACH;
+    this.anchor.set(
+      THREE.MathUtils.clamp(ndc.x, -1, 1) * reach.x * this.motionScale,
+      THREE.MathUtils.clamp(ndc.y, -1, 1) * reach.y * this.motionScale,
+      0,
+    );
+  }
+
   update(time: number): void {
     const dt = Math.min(time - this.time, 0.05);
     this.time = time;
@@ -118,12 +134,14 @@ export class Blob {
 
     // Damped spring pulling the body back to the origin.
     const pos = this.mesh.position;
-    this.velocity.addScaledVector(pos, -RECOIL_STIFFNESS * dt);
+    this.velocity.addScaledVector(pos.clone().sub(this.anchor), -RECOIL_STIFFNESS * dt);
     this.velocity.multiplyScalar(Math.max(0, 1 - RECOIL_DAMPING * dt));
     pos.addScaledVector(this.velocity, dt);
 
     this.material.uniforms.uTime.value = time;
-    this.mesh.rotation.y = time * 0.1;
+    // The blob leans towards where it is carried, as if turning to follow the hand.
+    this.mesh.rotation.y = time * 0.1 + pos.x * 0.35;
+    this.mesh.rotation.x = -pos.y * 0.35;
   }
 
   private attachShared(material: THREE.ShaderMaterial): void {

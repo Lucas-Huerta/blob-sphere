@@ -7,7 +7,10 @@ import { bindKeyboard } from '@/input/keyboard';
 import { bindPoke } from '@/input/poke';
 import { bindSwipe } from '@/input/swipe';
 import { materials } from '@/materials';
+import { HandController } from '@/input/hands/HandController';
+import { HandTracker } from '@/input/hands/HandTracker';
 import { Hud } from '@/ui/hud';
+import { HandControlUi } from '@/ui/handControl';
 
 export class App {
   private renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -17,6 +20,9 @@ export class App {
   private carousel = new Carousel(materials.length);
   private clock = new THREE.Clock();
   private timeline?: gsap.core.Timeline;
+  private tracker = new HandTracker();
+  private cameraDistance = 5;
+  private cameraDistanceTarget = 5;
   private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(private container: HTMLElement) {
@@ -29,6 +35,7 @@ export class App {
     this.resize();
 
     new Hud(document.body, materials, this.carousel);
+    this.setupHands();
     bindKeyboard(this.carousel);
     // Registered first so `grabbed` is already up to date when the swipe handler reads it.
     const poke = bindPoke(this.renderer.domElement, {
@@ -46,8 +53,45 @@ export class App {
   start(): void {
     this.renderer.setAnimationLoop(() => {
       this.blob.update(this.clock.getElapsedTime());
+      this.cameraDistance += (this.cameraDistanceTarget - this.cameraDistance) * 0.12;
+      this.camera.position.z = this.cameraDistance;
       this.renderer.render(this.scene, this.camera);
     });
+  }
+
+  /** Optional webcam control: a button opens the tutorial, camera only starts after consent. */
+  private setupHands(): void {
+    const ui = new HandControlUi(document.body, {
+      start: () => this.tracker.start(),
+      stop: () => this.stopHands(),
+    });
+    const controller = new HandController(
+      {
+        pinchStart: (ndc) => {
+          const hit = this.blob.pokeAt(ndc, this.camera, 1);
+          if (hit) this.blob.grab(ndc, this.camera);
+          return hit;
+        },
+        pinchMove: (ndc) => this.blob.grab(ndc, this.camera),
+        pinchEnd: () => this.blob.releaseGrab(),
+        openHand: (ndc) => this.blob.carryTo(ndc),
+        zoom: (factor) => (this.cameraDistanceTarget = 5 * factor),
+        handsSeen: (n) => ui.setHandsSeen(n),
+        cursor: (ndc, pinching) => ui.setCursor(ndc, pinching),
+      },
+      () => this.camera.aspect,
+    );
+    this.handController = controller;
+    this.tracker.onStop(() => ui.notifyStopped());
+    this.tracker.onFrame((hands, dt) => controller.update(hands, dt));
+  }
+
+  private handController?: HandController;
+
+  private stopHands(): void {
+    this.tracker.stop();
+    this.handController?.reset();
+    this.cameraDistanceTarget = 5;
   }
 
   /** Shrink the blob, swap its material, then let it spring back. */
