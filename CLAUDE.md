@@ -36,7 +36,7 @@ Chaque matériau = un couple vertex/fragment GLSL + des uniforms réglables. Cla
 6. ✅ **Holographique / foil arc-en-ciel** — gradient angulaire, scanlines, bruit de grain. *(fait : `materials/holographic/`, palette cosinus selon l'angle, scanlines, bande glitch, grain, blending additif)*
 7. ✅ **Toon / cel-shading** — bandes de lumière quantifiées, contour (rim/outline). *(fait : `materials/toon/`, 3 tons anti-aliasés via `fwidth`, trame de points dans l'ombre, contour d'encre)*
 8. ✅ **Plasma / énergie** — bruit multi-octaves animé, glow additif, éclairs. *(fait : `materials/plasma/`, fbm déformé + arcs par passage à zéro du bruit, clignotement, tonemap doux, blending additif)*
-9. **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse.
+9. ✅ **Perle / opale** — nacre, iridescence douce, subtile profondeur laiteuse. *(fait : `materials/pearl/`, bandes de nacre par bruit étiré faisant varier l'épaisseur du film, partage `chunks/thinFilm.glsl` avec l'iridescent)*
 10. **Or / métal brossé (PBR)** — BRDF métallique, anisotropie optionnelle.
 11. **Glace / verre dépoli** — réfraction floutée, givre, bruit de surface.
 
@@ -153,7 +153,7 @@ blob-sphere/
     │   ├── glass/ …
     │   └── …
     ├── shaders/
-    │   └── chunks/            # code GLSL partagé : noise.glsl, fresnel.glsl, normals.glsl, tonemap.glsl
+    │   └── chunks/            # code GLSL partagé : noise.glsl, blobDisplace.glsl, thinFilm.glsl (+ à venir : fresnel, tonemap)
     ├── carousel/
     │   ├── Carousel.ts        # état (index courant), navigation, événements
     │   └── carousel.css
