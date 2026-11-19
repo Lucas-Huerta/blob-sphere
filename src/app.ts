@@ -22,7 +22,7 @@ export class App {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.blob = new Blob(materials[0], { envMap: createEnvironment(this.renderer) });
     container.appendChild(this.renderer.domElement);
-    this.camera.position.set(0, 0, 4);
+    this.camera.position.set(0, 0, 5);
     this.scene.add(this.blob.mesh);
     window.addEventListener('resize', this.resize);
     this.resize();
