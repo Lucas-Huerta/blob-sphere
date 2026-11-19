@@ -1,0 +1,81 @@
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: #f2f2f7;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.hud > * { pointer-events: auto; }
+
+.hud-info {
+  position: absolute;
+  left: 50%;
+  bottom: 12vh;
+  transform: translateX(-50%);
+  width: min(32rem, calc(100% - 8rem));
+  text-align: center;
+  pointer-events: none;
+}
+.hud-info.swap > * { animation: hud-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.hud-info.swap > :nth-child(2) { animation-delay: 0.05s; }
+.hud-info.swap > :nth-child(3) { animation-delay: 0.1s; }
+@keyframes hud-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.hud-counter { display: block; font-size: 0.75rem; letter-spacing: 0.2em; opacity: 0.55; }
+.hud-title { margin: 0.4rem 0 0.3rem; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 600; letter-spacing: -0.01em; }
+.hud-desc { margin: 0; font-size: 0.95rem; line-height: 1.5; opacity: 0.7; }
+
+.hud-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.06);
+  color: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.2s;
+}
+.hud-arrow:hover { background: rgb(255 255 255 / 0.16); }
+.hud-arrow-prev { left: 1.5rem; }
+.hud-arrow-next { right: 1.5rem; }
+
+.hud-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 5vh;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+}
+.hud-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 0;
+  background: rgb(255 255 255 / 0.3);
+  cursor: pointer;
+  transition: width 0.3s, background 0.3s;
+}
+.hud-dot.active { width: 1.6rem; background: #fff; }
+
+.hud button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .hud-arrow { top: auto; bottom: 4vh; transform: none; width: 2.5rem; height: 2.5rem; }
+  .hud-arrow-prev { left: 1rem; }
+  .hud-arrow-next { right: 1rem; }
+  .hud-info { width: calc(100% - 3rem); bottom: 14vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-info.swap > * { animation: none; }
+  .hud-dot, .hud-arrow { transition: none; }
+}
